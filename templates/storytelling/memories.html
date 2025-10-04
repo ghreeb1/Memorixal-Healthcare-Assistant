@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مكتبة الذكريات - حكايات الذكريات</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', path='css/storytelling.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" /></svg>
+                <span>مكتبة الذكريات</span>
+            </h1>
+            <p class="subtitle">هنا تجد كل حكاياتك ولحظاتك التي لا تنسى</p>
+        </header>
+
+        <nav class="tabs">
+            <a href="{{ request.url_for('storytelling-home') }}" class="tab-link">
+                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h7.5" /></svg>
+                <span>الرئيسية</span>
+            </a>
+            <a href="{{ request.url_for('storytelling-add') }}" class="tab-link">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                <span>إضافة ذكرى</span>
+            </a>
+            <a href="{{ request.url_for('storytelling-memories') }}" class="tab-link active">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" /></svg>
+                <span>مكتبة الذكريات</span>
+            </a>
+        </nav>
+
+        <main>
+            <div id="loadingIndicator" class="loading">
+                <div class="spinner"></div>
+                <p>جاري تحميل الذكريات...</p>
+            </div>
+            
+            <section class="memories-section">
+                <div id="memoriesContainer" class="memories-grid">
+                    <!-- Memories will be loaded here -->
+                </div>
+            </section>
+        </main>
+        
+        <div id="statusMessages" class="status-messages"></div>
+    </div>
+
+    <!-- Audio player modal -->
+    <div id="audioModal" class="modal hidden">
+        <div class="modal-content">
+            <button class="close-btn" onclick="closeAudioModal()">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+            </button>
+            <h3>تشغيل الذكرى صوتياً</h3>
+            <audio id="audioPlayer" controls style="width: 100%; margin-top: 1rem;">
+                متصفحك لا يدعم تشغيل الصوت.
+            </audio>
+        </div>
+    </div>
+    
+    <script src="{{ url_for('static', path='js/storytelling-memories.js') }}"></script>
+</body>
+</html>

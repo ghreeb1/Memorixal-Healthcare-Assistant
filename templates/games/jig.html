@@ -1,0 +1,1108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enhanced Jigsaw Puzzle Master</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            font-family: 'Poppins', sans-serif;
+        }
+        
+        .loading-spinner {
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-top: 4px solid white;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .puzzle-piece {
+            cursor: grab;
+            transition: all 0.2s ease;
+            border: 2px solid rgba(255, 255, 255, 0.8);
+            border-radius: 4px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+            background-size: cover;
+            background-repeat: no-repeat;
+        }
+        
+        .puzzle-piece:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+            z-index: 10;
+        }
+        
+        .puzzle-piece.dragging {
+            opacity: 0.8;
+            transform: rotate(3deg) scale(1.1);
+            z-index: 100;
+            cursor: grabbing;
+        }
+        
+        .puzzle-piece.correct {
+            border-color: #10b981;
+            cursor: default;
+            animation: correctPlacement 0.6s ease;
+        }
+        
+        @keyframes correctPlacement {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.15); }
+            100% { transform: scale(1); }
+        }
+        
+        .drop-zone {
+            border: 2px dashed transparent;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+        }
+        
+        .drop-zone.drag-over {
+            border-color: #3b82f6;
+            background: rgba(59, 130, 246, 0.1);
+            animation: dragOverPulse 1s ease-in-out infinite;
+        }
+        
+        @keyframes dragOverPulse {
+            0%, 100% { background: rgba(59, 130, 246, 0.1); }
+            50% { background: rgba(59, 130, 246, 0.2); }
+        }
+        
+        .puzzle-board {
+            background: linear-gradient(45deg, #f8fafc 25%, transparent 25%), 
+                        linear-gradient(-45deg, #f8fafc 25%, transparent 25%), 
+                        linear-gradient(45deg, transparent 75%, #f8fafc 75%), 
+                        linear-gradient(-45deg, transparent 75%, #f8fafc 75%);
+            background-size: 16px 16px;
+            background-position: 0 0, 0 8px, 8px -8px, -8px 0px;
+        }
+        
+        .progress-ring {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: conic-gradient(#3b82f6 var(--progress, 0%), #e5e7eb 0%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+        
+        .progress-ring::before {
+            content: '';
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: white;
+        }
+        
+        .progress-text {
+            position: relative;
+            z-index: 1;
+            font-weight: 700;
+            color: #3b82f6;
+        }
+        
+        .image-upload {
+            border: 2px dashed #cbd5e1;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        
+        .image-upload:hover {
+            border-color: #3b82f6;
+            background: rgba(59, 130, 246, 0.05);
+        }
+        
+        .image-upload.drag-over {
+            border-color: #10b981;
+            background: rgba(16, 185, 129, 0.1);
+        }
+        
+        .pieces-container {
+            max-height: 400px;
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: #cbd5e1 #f1f5f9;
+        }
+        
+        .pieces-container::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .pieces-container::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 3px;
+        }
+        
+        .pieces-container::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 3px;
+        }
+        
+        .confetti {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            animation: confetti-fall 3s ease-out infinite;
+        }
+        
+        @keyframes confetti-fall {
+            0% {
+                transform: translateY(-100px) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(400px) rotate(360deg);
+                opacity: 0;
+            }
+        }
+        
+        .modal-backdrop {
+            backdrop-filter: blur(8px);
+        }
+        
+        @media (max-width: 768px) {
+            .puzzle-piece {
+                min-width: 60px;
+                min-height: 60px;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 min-h-screen">
+    <!-- Loading Screen -->
+    <div id="loadingScreen" class="fixed inset-0 bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center z-50 transition-opacity duration-500">
+        <div class="text-center text-white">
+            <div class="loading-spinner mx-auto mb-6"></div>
+            <h2 class="text-3xl font-bold mb-2">🧩 Jigsaw Puzzle Master</h2>
+            <p class="text-lg opacity-90 mb-6">Preparing your puzzle experience...</p>
+            <div class="w-64 h-2 bg-white bg-opacity-20 rounded-full overflow-hidden">
+                <div id="loadingBar" class="h-full bg-white rounded-full transition-all duration-300" style="width: 0%"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Game Container -->
+    <div id="gameContainer" class="container mx-auto px-4 py-6 min-h-screen" style="display: none;">
+        <!-- Header -->
+        <header class="text-center mb-8 bg-white rounded-2xl shadow-xl p-6">
+            <h1 class="text-4xl md:text-5xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-2">
+                🧩 Jigsaw Puzzle Master
+            </h1>
+            <p class="text-gray-600 text-lg">Challenge yourself with beautiful puzzle games!</p>
+        </header>
+
+        <!-- Controls -->
+        <div class="bg-white rounded-2xl shadow-xl p-6 mb-6">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Difficulty</label>
+                    <select id="difficulty" class="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none transition-colors">
+                        <option value="easy">Easy (3×3)</option>
+                        <option value="medium" selected>Medium (4×4)</option>
+                        <option value="hard">Hard (5×5)</option>
+                    </select>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Preset Images</label>
+                    <select id="imageSelect" class="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none transition-colors">
+                        <option value="nature">Nature Scene</option>
+                        <option value="abstract">Abstract Art</option>
+                        <option value="ocean">Ocean View</option>
+                        <option value="space">Space Scene</option>
+                        <option value="floral">Floral Design</option>
+                        <option value="custom">Custom Image</option>
+                    </select>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Upload Image</label>
+                    <input type="file" id="imageUpload" accept="image/*" class="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none transition-colors">
+                </div>
+                
+                <button id="startButton" class="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-200 transform hover:scale-105 shadow-lg">
+                    <i class="fas fa-play mr-2"></i>
+                    Start Game
+                </button>
+            </div>
+        </div>
+
+        <!-- Image Upload Area -->
+        <div id="uploadArea" class="image-upload bg-white rounded-2xl shadow-xl p-8 mb-6 text-center" style="display: none;">
+            <i class="fas fa-cloud-upload-alt text-4xl text-gray-400 mb-4"></i>
+            <h3 class="text-xl font-semibold text-gray-700 mb-2">Upload Your Image</h3>
+            <p class="text-gray-500 mb-4">Drag and drop an image here, or click to browse</p>
+            <div id="imagePreview" class="hidden">
+                <img id="previewImg" class="max-w-xs max-h-48 mx-auto rounded-lg shadow-md mb-4">
+                <p class="text-sm text-gray-600">Image loaded successfully!</p>
+            </div>
+        </div>
+
+        <!-- Statistics -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+            <div class="bg-white rounded-xl shadow-lg p-4 text-center">
+                <div class="text-2xl font-bold text-blue-600" id="piecesDisplay">0/0</div>
+                <div class="text-sm text-gray-600">Pieces</div>
+            </div>
+            <div class="bg-white rounded-xl shadow-lg p-4 text-center">
+                <div class="text-2xl font-bold text-green-600" id="timer">00:00</div>
+                <div class="text-sm text-gray-600">Time</div>
+            </div>
+            <div class="bg-white rounded-xl shadow-lg p-4 text-center">
+                <div class="text-2xl font-bold text-purple-600" id="moves">0</div>
+                <div class="text-sm text-gray-600">Moves</div>
+            </div>
+            <div class="bg-white rounded-xl shadow-lg p-4 text-center">
+                <div class="text-2xl font-bold text-orange-600" id="progress">0%</div>
+                <div class="text-sm text-gray-600">Progress</div>
+            </div>
+        </div>
+
+        <!-- Game Area -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+            <!-- Puzzle Board -->
+            <div class="bg-white rounded-2xl shadow-xl p-6">
+                <h3 class="text-xl font-semibold text-gray-800 mb-4 text-center">
+                    <i class="fas fa-puzzle-piece mr-2"></i>
+                    Puzzle Board
+                </h3>
+                <div class="flex justify-center items-center min-h-96 relative">
+                    <div id="puzzleBoard" class="puzzle-board border-4 border-gray-300 rounded-xl relative shadow-inner"></div>
+                    <div id="progressRing" class="absolute top-4 right-4">
+                        <div class="progress-ring" style="--progress: 0%">
+                            <div class="progress-text text-sm">0%</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Puzzle Pieces -->
+            <div class="bg-white rounded-2xl shadow-xl p-6">
+                <h3 class="text-xl font-semibold text-gray-800 mb-4 text-center">
+                    <i class="fas fa-th mr-2"></i>
+                    Puzzle Pieces
+                </h3>
+                <div id="piecesContainer" class="pieces-container bg-gray-50 rounded-xl p-4 min-h-96 flex flex-wrap gap-2 justify-center items-start">
+                    <div class="flex items-center justify-center w-full h-48 text-gray-500">
+                        <div class="text-center">
+                            <i class="fas fa-play-circle text-4xl mb-2"></i>
+                            <p>Click "Start Game" to begin!</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Reference Image -->
+        <div class="bg-white rounded-2xl shadow-xl p-6 text-center">
+            <h4 class="text-lg font-semibold text-gray-800 mb-4">
+                <i class="fas fa-image mr-2"></i>
+                Reference Image
+            </h4>
+            <div id="referenceImage" class="w-48 h-36 mx-auto bg-gray-100 rounded-lg shadow-md bg-cover bg-center"></div>
+        </div>
+    </div>
+
+    <!-- Win Modal -->
+    <div id="winModal" class="fixed inset-0 modal-backdrop bg-black bg-opacity-50 flex items-center justify-center z-50 opacity-0 pointer-events-none transition-all duration-300">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full mx-4 transform scale-95 transition-transform duration-300">
+            <div class="bg-gradient-to-r from-green-500 to-blue-500 text-white p-6 rounded-t-2xl text-center relative overflow-hidden">
+                <div class="relative z-10">
+                    <i class="fas fa-trophy text-4xl mb-2"></i>
+                    <h2 class="text-2xl font-bold">Congratulations!</h2>
+                </div>
+                <!-- Confetti Animation -->
+                <div class="absolute inset-0">
+                    <div class="confetti bg-yellow-400" style="left: 10%; animation-delay: 0s;"></div>
+                    <div class="confetti bg-red-400" style="left: 30%; animation-delay: 0.5s;"></div>
+                    <div class="confetti bg-green-400" style="left: 50%; animation-delay: 1s;"></div>
+                    <div class="confetti bg-blue-400" style="left: 70%; animation-delay: 1.5s;"></div>
+                    <div class="confetti bg-purple-400" style="left: 90%; animation-delay: 2s;"></div>
+                </div>
+            </div>
+            
+            <div class="p-6">
+                <p class="text-gray-600 text-center mb-4">You've successfully completed the puzzle!</p>
+                <div id="finalStats" class="bg-gray-50 rounded-lg p-4 mb-6 text-left space-y-2"></div>
+                
+                <div class="flex gap-3">
+                    <button id="playAgainBtn" class="flex-1 bg-gradient-to-r from-blue-500 to-purple-500 text-white py-3 px-4 rounded-lg font-semibold hover:from-blue-600 hover:to-purple-600 transition-all duration-200">
+                        <i class="fas fa-redo mr-2"></i>
+                        Play Again
+                    </button>
+                    <button id="closeModalBtn" class="flex-1 bg-gray-200 text-gray-800 py-3 px-4 rounded-lg font-semibold hover:bg-gray-300 transition-colors duration-200">
+                        <i class="fas fa-times mr-2"></i>
+                        Close
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Game Configuration
+        const gameConfig = {
+            difficulties: {
+                easy: { grid: 3, boardSize: 300, pieceSize: 100 },
+                medium: { grid: 4, boardSize: 400, pieceSize: 100 },
+                hard: { grid: 5, boardSize: 500, pieceSize: 100 }
+            },
+            images: {
+                nature: {
+                    url: '/static/images/girl-walking-on-isolated-moon-background-flat-illustration-free-vector.jpg',
+                    name: 'Nature Scene'
+                },
+                abstract: {
+                    url: '/static/images/images.jpg',
+                    name: 'Abstract Art'
+                },
+                ocean: {
+                    url: '/static/images/pexels-souvenirpixels-417074.jpg',
+                    name: 'Ocean View'
+                },
+                space: {
+                    url: '/static/images/girl-walking-on-isolated-moon-background-flat-illustration-free-vector.jpg',
+                    name: 'Space Scene'
+                },
+                floral: {
+                    url: '/static/images/pexels-souvenirpixels-417074.jpg',
+                    name: 'Floral Design'
+                }
+            }
+        };
+
+        // Game State
+        let gameState = {
+            difficulty: 'medium',
+            currentImage: 'nature',
+            customImageUrl: null,
+            isPlaying: false,
+            startTime: null,
+            timer: null,
+            moves: 0,
+            pieces: [],
+            placedPieces: 0,
+            totalPieces: 0,
+            draggedPiece: null
+        };
+
+        // DOM Elements
+        let elements = {};
+
+        // Preloaded Images
+        let preloadedImages = new Map();
+
+        // Initialize DOM Elements
+        function initializeElements() {
+            elements = {
+                loadingScreen: document.getElementById('loadingScreen'),
+                loadingBar: document.getElementById('loadingBar'),
+                gameContainer: document.getElementById('gameContainer'),
+                difficulty: document.getElementById('difficulty'),
+                imageSelect: document.getElementById('imageSelect'),
+                imageUpload: document.getElementById('imageUpload'),
+                uploadArea: document.getElementById('uploadArea'),
+                imagePreview: document.getElementById('imagePreview'),
+                previewImg: document.getElementById('previewImg'),
+                startButton: document.getElementById('startButton'),
+                piecesDisplay: document.getElementById('piecesDisplay'),
+                timer: document.getElementById('timer'),
+                moves: document.getElementById('moves'),
+                progress: document.getElementById('progress'),
+                puzzleBoard: document.getElementById('puzzleBoard'),
+                piecesContainer: document.getElementById('piecesContainer'),
+                progressRing: document.getElementById('progressRing'),
+                referenceImage: document.getElementById('referenceImage'),
+                winModal: document.getElementById('winModal'),
+                finalStats: document.getElementById('finalStats'),
+                playAgainBtn: document.getElementById('playAgainBtn'),
+                closeModalBtn: document.getElementById('closeModalBtn')
+            };
+        }
+
+        // Preload Images with Better Performance - Only load current image
+        async function preloadImages() {
+            // Only preload the currently selected image for faster startup
+            const currentImageKey = gameState.currentImage;
+            const config = gameConfig.images[currentImageKey];
+            
+            if (!config) {
+                console.warn('No image config found for:', currentImageKey);
+                return;
+            }
+
+            const updateProgress = (progress) => {
+                elements.loadingBar.style.width = progress + '%';
+            };
+
+            return new Promise((resolve) => {
+                const img = new Image();
+                
+                const handleLoad = () => {
+                    preloadedImages.set(currentImageKey, img);
+                    updateProgress(100);
+                    console.log(`Preloaded image: ${currentImageKey}`);
+                    resolve(img);
+                };
+
+                const handleError = () => {
+                    console.warn(`Failed to load image: ${currentImageKey}`);
+                    updateProgress(100);
+                    resolve(null);
+                };
+
+                img.onload = handleLoad;
+                img.onerror = handleError;
+                
+                // Reduced timeout for faster startup
+                setTimeout(() => {
+                    if (!preloadedImages.has(currentImageKey)) {
+                        handleError();
+                    }
+                }, 2000);
+
+                img.src = config.url;
+            });
+        }
+
+        // Load additional images in background after game starts
+        function preloadRemainingImages() {
+            Object.entries(gameConfig.images).forEach(([key, config]) => {
+                if (!preloadedImages.has(key)) {
+                    const img = new Image();
+                    img.onload = () => {
+                        preloadedImages.set(key, img);
+                        console.log(`Background loaded: ${key}`);
+                    };
+                    img.onerror = () => console.warn(`Failed to background load: ${key}`);
+                    img.src = config.url;
+                }
+            });
+        }
+
+        // Handle Image Upload
+        function handleImageUpload(file) {
+            if (!file || !file.type.startsWith('image/')) {
+                alert('Please select a valid image file.');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const img = new Image();
+                img.onload = () => {
+                    // Resize image if too large
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+                    const maxSize = 800;
+                    
+                    let { width, height } = img;
+                    if (width > height && width > maxSize) {
+                        height = (height * maxSize) / width;
+                        width = maxSize;
+                    } else if (height > maxSize) {
+                        width = (width * maxSize) / height;
+                        height = maxSize;
+                    }
+                    
+                    canvas.width = width;
+                    canvas.height = height;
+                    ctx.drawImage(img, 0, 0, width, height);
+                    
+                    gameState.customImageUrl = canvas.toDataURL('image/jpeg', 0.8);
+                    elements.previewImg.src = gameState.customImageUrl;
+                    elements.imagePreview.classList.remove('hidden');
+                    elements.imageSelect.value = 'custom';
+                    gameState.currentImage = 'custom';
+                    updateReferenceImage();
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // Event Listeners
+        function attachEventListeners() {
+            elements.startButton.addEventListener('click', startNewGame);
+            elements.playAgainBtn.addEventListener('click', startNewGame);
+            elements.closeModalBtn.addEventListener('click', closeModal);
+
+            elements.difficulty.addEventListener('change', updateGameSettings);
+            elements.imageSelect.addEventListener('change', async (e) => {
+                if (e.target.value === 'custom') {
+                    elements.uploadArea.style.display = 'block';
+                } else {
+                    elements.uploadArea.style.display = 'none';
+                    gameState.currentImage = e.target.value;
+                    
+                    // Load the selected image if not already loaded
+                    if (!preloadedImages.has(gameState.currentImage)) {
+                        const config = gameConfig.images[gameState.currentImage];
+                        if (config) {
+                            const img = new Image();
+                            img.onload = () => {
+                                preloadedImages.set(gameState.currentImage, img);
+                                updateReferenceImage();
+                            };
+                            img.src = config.url;
+                        }
+                    } else {
+                        updateReferenceImage();
+                    }
+                }
+            });
+
+            elements.imageUpload.addEventListener('change', (e) => {
+                if (e.target.files[0]) {
+                    handleImageUpload(e.target.files[0]);
+                }
+            });
+
+            // Drag and drop for image upload
+            elements.uploadArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                elements.uploadArea.classList.add('drag-over');
+            });
+
+            elements.uploadArea.addEventListener('dragleave', () => {
+                elements.uploadArea.classList.remove('drag-over');
+            });
+
+            elements.uploadArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                elements.uploadArea.classList.remove('drag-over');
+                const files = e.dataTransfer.files;
+                if (files[0]) {
+                    handleImageUpload(files[0]);
+                }
+            });
+
+            elements.uploadArea.addEventListener('click', () => {
+                elements.imageUpload.click();
+            });
+
+            // Keyboard shortcuts
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') closeModal();
+                if (e.key === ' ' && gameState.isPlaying) {
+                    e.preventDefault();
+                    // Pause functionality could be added here
+                }
+            });
+        }
+
+        // Update Game Settings
+        function updateGameSettings() {
+            gameState.difficulty = elements.difficulty.value;
+            if (elements.imageSelect.value !== 'custom') {
+                gameState.currentImage = elements.imageSelect.value;
+                updateReferenceImage();
+            }
+        }
+
+        // Update Reference Image
+        function updateReferenceImage() {
+            let imageUrl = '';
+            
+            if (gameState.currentImage === 'custom' && gameState.customImageUrl) {
+                imageUrl = gameState.customImageUrl;
+            } else if (gameConfig.images[gameState.currentImage]) {
+                const img = preloadedImages.get(gameState.currentImage);
+                if (img) {
+                    imageUrl = img.src;
+                }
+            }
+            
+            if (imageUrl) {
+                elements.referenceImage.style.backgroundImage = `url(${imageUrl})`;
+            }
+        }
+
+        // Start New Game
+        async function startNewGame() {
+            console.log('Starting new game...');
+            
+            // Reset game state
+            resetGameState();
+            closeModal();
+            updateStats();
+            clearBoard();
+
+            // Create puzzle
+            await createPuzzle();
+            updateReferenceImage();
+
+            console.log('New game started successfully');
+        }
+
+        // Reset Game State
+        function resetGameState() {
+            gameState.isPlaying = false;
+            gameState.startTime = null;
+            gameState.moves = 0;
+            gameState.placedPieces = 0;
+            gameState.pieces = [];
+            gameState.draggedPiece = null;
+
+            if (gameState.timer) {
+                clearInterval(gameState.timer);
+                gameState.timer = null;
+            }
+        }
+
+        // Create Puzzle
+        async function createPuzzle() {
+            const config = gameConfig.difficulties[gameState.difficulty];
+            let imageUrl = '';
+
+            if (gameState.currentImage === 'custom' && gameState.customImageUrl) {
+                imageUrl = gameState.customImageUrl;
+            } else if (preloadedImages.has(gameState.currentImage)) {
+                imageUrl = preloadedImages.get(gameState.currentImage).src;
+            } else {
+                console.error('No image available for puzzle creation');
+                return;
+            }
+
+            // Setup board
+            const board = elements.puzzleBoard;
+            const piecesContainer = elements.piecesContainer;
+
+            board.style.width = config.boardSize + 'px';
+            board.style.height = config.boardSize + 'px';
+
+            const pieceSize = config.boardSize / config.grid;
+            gameState.totalPieces = config.grid * config.grid;
+
+            // Clear containers
+            board.innerHTML = '';
+            piecesContainer.innerHTML = '';
+
+            // Create drop zones
+            createDropZones(config, pieceSize);
+
+            // Create puzzle pieces
+            await createPuzzlePieces(config, pieceSize, imageUrl);
+
+            console.log(`Created ${gameState.totalPieces}-piece puzzle`);
+        }
+
+        // Create Drop Zones
+        function createDropZones(config, pieceSize) {
+            const fragment = document.createDocumentFragment();
+
+            for (let row = 0; row < config.grid; row++) {
+                for (let col = 0; col < config.grid; col++) {
+                    const dropZone = document.createElement('div');
+                    dropZone.className = 'drop-zone absolute';
+                    dropZone.style.cssText = `
+                        left: ${col * pieceSize}px;
+                        top: ${row * pieceSize}px;
+                        width: ${pieceSize}px;
+                        height: ${pieceSize}px;
+                    `;
+                    dropZone.dataset.row = row;
+                    dropZone.dataset.col = col;
+
+                    dropZone.addEventListener('dragover', handleDragOver);
+                    dropZone.addEventListener('drop', handleDrop);
+                    dropZone.addEventListener('dragleave', handleDragLeave);
+
+                    fragment.appendChild(dropZone);
+                }
+            }
+
+            elements.puzzleBoard.appendChild(fragment);
+        }
+
+        // Create Puzzle Pieces
+        async function createPuzzlePieces(config, pieceSize, imageUrl) {
+            const pieces = [];
+
+            // Generate piece positions
+            for (let row = 0; row < config.grid; row++) {
+                for (let col = 0; col < config.grid; col++) {
+                    pieces.push({ row, col, id: `piece-${row}-${col}` });
+                }
+            }
+
+            // Shuffle pieces
+            shuffleArray(pieces);
+
+            // Create DOM elements
+            const fragment = document.createDocumentFragment();
+
+            pieces.forEach((pieceData) => {
+                const piece = createPuzzlePiece(pieceData, pieceSize, imageUrl, config.boardSize);
+                gameState.pieces.push(piece);
+                fragment.appendChild(piece);
+            });
+
+            elements.piecesContainer.appendChild(fragment);
+        }
+
+        // Create Individual Puzzle Piece
+        function createPuzzlePiece(pieceData, pieceSize, imageUrl, boardSize) {
+            const piece = document.createElement('div');
+            piece.className = 'puzzle-piece relative';
+            piece.id = pieceData.id;
+            piece.draggable = true;
+
+            piece.style.cssText = `
+                width: ${pieceSize}px;
+                height: ${pieceSize}px;
+                background-image: url(${imageUrl});
+                background-size: ${boardSize}px ${boardSize}px;
+                background-position: ${-pieceData.col * pieceSize}px ${-pieceData.row * pieceSize}px;
+            `;
+
+            piece.dataset.correctRow = pieceData.row;
+            piece.dataset.correctCol = pieceData.col;
+            piece.dataset.placed = 'false';
+
+            // Event listeners
+            piece.addEventListener('dragstart', handleDragStart);
+            piece.addEventListener('dragend', handleDragEnd);
+
+            // Touch events for mobile
+            piece.addEventListener('touchstart', handleTouchStart, { passive: false });
+            piece.addEventListener('touchmove', handleTouchMove, { passive: false });
+            piece.addEventListener('touchend', handleTouchEnd, { passive: false });
+
+            return piece;
+        }
+
+        // Drag and Drop Handlers
+        function handleDragStart(e) {
+            if (!gameState.startTime) {
+                startTimer();
+            }
+
+            gameState.draggedPiece = e.target;
+            e.target.classList.add('dragging');
+            e.dataTransfer.effectAllowed = 'move';
+        }
+
+        function handleDragEnd(e) {
+            e.target.classList.remove('dragging');
+            gameState.draggedPiece = null;
+        }
+
+        function handleDragOver(e) {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+            e.currentTarget.classList.add('drag-over');
+        }
+
+        function handleDragLeave(e) {
+            e.currentTarget.classList.remove('drag-over');
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            const dropZone = e.currentTarget;
+            dropZone.classList.remove('drag-over');
+
+            if (!gameState.draggedPiece) return;
+
+            const targetRow = parseInt(dropZone.dataset.row);
+            const targetCol = parseInt(dropZone.dataset.col);
+
+            placePiece(gameState.draggedPiece, targetRow, targetCol, dropZone);
+        }
+
+        // Touch Event Handlers
+        let touchState = { startX: 0, startY: 0, currentPiece: null };
+
+        function handleTouchStart(e) {
+            e.preventDefault();
+            const touch = e.touches[0];
+            touchState.startX = touch.clientX;
+            touchState.startY = touch.clientY;
+            touchState.currentPiece = e.target;
+
+            e.target.classList.add('dragging');
+
+            if (!gameState.startTime) {
+                startTimer();
+            }
+        }
+
+        function handleTouchMove(e) {
+            e.preventDefault();
+            if (!touchState.currentPiece) return;
+
+            const touch = e.touches[0];
+            const piece = touchState.currentPiece;
+
+            piece.style.position = 'fixed';
+            piece.style.left = (touch.clientX - 50) + 'px';
+            piece.style.top = (touch.clientY - 50) + 'px';
+            piece.style.zIndex = '1000';
+        }
+
+        function handleTouchEnd(e) {
+            e.preventDefault();
+            if (!touchState.currentPiece) return;
+
+            const piece = touchState.currentPiece;
+            const touch = e.changedTouches[0];
+
+            const dropZone = document.elementFromPoint(touch.clientX, touch.clientY);
+
+            piece.classList.remove('dragging');
+            piece.style.position = '';
+            piece.style.left = '';
+            piece.style.top = '';
+            piece.style.zIndex = '';
+
+            if (dropZone && dropZone.classList.contains('drop-zone')) {
+                const targetRow = parseInt(dropZone.dataset.row);
+                const targetCol = parseInt(dropZone.dataset.col);
+                placePiece(piece, targetRow, targetCol, dropZone);
+            }
+
+            touchState.currentPiece = null;
+        }
+
+        // Place Piece
+        function placePiece(piece, targetRow, targetCol, dropZone) {
+            const correctRow = parseInt(piece.dataset.correctRow);
+            const correctCol = parseInt(piece.dataset.correctCol);
+            const config = gameConfig.difficulties[gameState.difficulty];
+            const pieceSize = config.boardSize / config.grid;
+
+            gameState.moves++;
+
+            // Check for existing piece at position
+            const existingPiece = findPieceAtPosition(targetRow, targetCol);
+            if (existingPiece && existingPiece !== piece) {
+                returnPieceToContainer(existingPiece);
+            }
+
+            // Remove piece from current position if placed
+            if (piece.dataset.placed === 'true') {
+                gameState.placedPieces--;
+            }
+
+            // Place the piece
+            piece.style.position = 'absolute';
+            piece.style.left = (targetCol * pieceSize) + 'px';
+            piece.style.top = (targetRow * pieceSize) + 'px';
+            piece.dataset.placed = 'true';
+            piece.dataset.currentRow = targetRow;
+            piece.dataset.currentCol = targetCol;
+
+            elements.puzzleBoard.appendChild(piece);
+            gameState.placedPieces++;
+
+            // Check if correct placement
+            const isCorrect = (correctRow === targetRow && correctCol === targetCol);
+
+            if (isCorrect) {
+                piece.classList.add('correct');
+                piece.draggable = false;
+            } else {
+                piece.classList.remove('correct');
+            }
+
+            updateStats();
+
+            if (checkWinCondition()) {
+                handleGameWin();
+            }
+        }
+
+        // Find Piece at Position
+        function findPieceAtPosition(row, col) {
+            return gameState.pieces.find(piece => 
+                piece.dataset.currentRow == row && piece.dataset.currentCol == col
+            );
+        }
+
+        // Return Piece to Container
+        function returnPieceToContainer(piece) {
+            piece.style.position = 'static';
+            piece.style.left = '';
+            piece.style.top = '';
+            piece.dataset.placed = 'false';
+            piece.dataset.currentRow = '';
+            piece.dataset.currentCol = '';
+            piece.classList.remove('correct');
+            piece.draggable = true;
+
+            elements.piecesContainer.appendChild(piece);
+            gameState.placedPieces--;
+        }
+
+        // Timer Functions
+        function startTimer() {
+            if (gameState.startTime) return;
+
+            gameState.startTime = Date.now();
+            gameState.isPlaying = true;
+
+            gameState.timer = setInterval(updateTimer, 1000);
+        }
+
+        function updateTimer() {
+            if (!gameState.startTime) return;
+
+            const elapsed = Date.now() - gameState.startTime;
+            const seconds = Math.floor(elapsed / 1000);
+            const minutes = Math.floor(seconds / 60);
+            const displaySeconds = seconds % 60;
+
+            elements.timer.textContent = `${minutes.toString().padStart(2, '0')}:${displaySeconds.toString().padStart(2, '0')}`;
+        }
+
+        // Update Statistics
+        function updateStats() {
+            elements.piecesDisplay.textContent = `${getCorrectPieces()}/${gameState.totalPieces}`;
+            elements.moves.textContent = gameState.moves;
+
+            const progressPercent = gameState.totalPieces > 0 
+                ? Math.round((getCorrectPieces() / gameState.totalPieces) * 100) 
+                : 0;
+            elements.progress.textContent = progressPercent + '%';
+
+            // Update progress ring
+            const progressRing = elements.progressRing.querySelector('.progress-ring');
+            const progressText = elements.progressRing.querySelector('.progress-text');
+            if (progressRing && progressText) {
+                progressRing.style.setProperty('--progress', progressPercent + '%');
+                progressText.textContent = progressPercent + '%';
+            }
+        }
+
+        // Win Condition
+        function checkWinCondition() {
+            return getCorrectPieces() === gameState.totalPieces;
+        }
+
+        function getCorrectPieces() {
+            return gameState.pieces.filter(piece => piece.classList.contains('correct')).length;
+        }
+
+        // Handle Game Win
+        function handleGameWin() {
+            gameState.isPlaying = false;
+
+            if (gameState.timer) {
+                clearInterval(gameState.timer);
+            }
+
+            const finalTime = elements.timer.textContent;
+            const efficiency = Math.max(0, Math.round((gameState.totalPieces / gameState.moves) * 100));
+
+            elements.finalStats.innerHTML = `
+                <div class="space-y-1">
+                    <div><strong><i class="fas fa-trophy text-yellow-500"></i> Puzzle Completed!</strong></div>
+                    <div><i class="fas fa-clock text-blue-500"></i> Time: ${finalTime}</div>
+                    <div><i class="fas fa-mouse-pointer text-green-500"></i> Moves: ${gameState.moves}</div>
+                    <div><i class="fas fa-chart-line text-purple-500"></i> Efficiency: ${efficiency}%</div>
+                    <div><i class="fas fa-cog text-gray-500"></i> Difficulty: ${gameState.difficulty.toUpperCase()}</div>
+                </div>
+            `;
+
+            // Show modal
+            setTimeout(() => {
+                elements.winModal.classList.remove('opacity-0', 'pointer-events-none');
+                elements.winModal.classList.add('opacity-100');
+                elements.winModal.querySelector('.bg-white').classList.remove('scale-95');
+                elements.winModal.querySelector('.bg-white').classList.add('scale-100');
+            }, 500);
+        }
+
+        // Utility Functions
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        function clearBoard() {
+            elements.puzzleBoard.innerHTML = '';
+            elements.piecesContainer.innerHTML = '<div class="flex items-center justify-center w-full h-48 text-gray-500"><div class="text-center"><i class="fas fa-spinner fa-spin text-2xl mb-2"></i><p>Loading puzzle pieces...</p></div></div>';
+        }
+
+        function closeModal() {
+            elements.winModal.classList.add('opacity-0', 'pointer-events-none');
+            elements.winModal.classList.remove('opacity-100');
+            elements.winModal.querySelector('.bg-white').classList.add('scale-95');
+            elements.winModal.querySelector('.bg-white').classList.remove('scale-100');
+        }
+
+        // Initialize App
+        async function initializeApp() {
+            console.log('Initializing Enhanced Jigsaw Puzzle Master...');
+
+            try {
+                initializeElements();
+                attachEventListeners();
+
+                // Try to preload images with timeout
+                const preloadPromise = preloadImages();
+                const timeoutPromise = new Promise(resolve => setTimeout(resolve, 3000));
+                
+                await Promise.race([preloadPromise, timeoutPromise]);
+
+                // Hide loading screen faster
+                setTimeout(() => {
+                    elements.loadingScreen.style.opacity = '0';
+                    setTimeout(() => {
+                        elements.loadingScreen.style.display = 'none';
+                        elements.gameContainer.style.display = 'block';
+                        // Start background loading of other images
+                        preloadRemainingImages();
+                    }, 300);
+                }, 500);
+
+                updateReferenceImage();
+                console.log('App initialized successfully');
+
+            } catch (error) {
+                console.error('Failed to initialize app:', error);
+                // Show game anyway with fallback
+                elements.loadingScreen.style.opacity = '0';
+                setTimeout(() => {
+                    elements.loadingScreen.style.display = 'none';
+                    elements.gameContainer.style.display = 'block';
+                }, 300);
+            }
+        }
+
+        // Start the app
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initializeApp);
+        } else {
+            initializeApp();
+        }
+
+        // Cleanup
+        window.addEventListener('beforeunload', () => {
+            if (gameState.timer) {
+                clearInterval(gameState.timer);
+            }
+        });
+    </script>
+</body>
+</html>

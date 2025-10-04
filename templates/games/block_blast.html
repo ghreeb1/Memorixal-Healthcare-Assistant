@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Block Blast</title>
+    <style>
+        /* Global Styles and Reset */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 10px;
+        }
+
+        /* Main Game Container */
+        .game-container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            max-width: 500px;
+            width: 100%;
+            text-align: center;
+        }
+
+        /* Header Styles */
+        .game-header {
+            margin-bottom: 20px;
+        }
+
+        .game-title {
+            color: #2c3e50;
+            font-size: 2.5em;
+            font-weight: bold;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Score and Controls */
+        .game-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .score {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #34495e;
+            background: linear-gradient(45deg, #f39c12, #e67e22);
+            padding: 10px 20px;
+            border-radius: 25px;
+            color: white;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            background: linear-gradient(45deg, #3498db, #2980b9);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 0.9em;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        /* Game Grid */
+        .game-grid {
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            gap: 3px;
+            background: #34495e;
+            padding: 10px;
+            border-radius: 10px;
+            margin: 0 auto;
+            max-width: 400px;
+        }
+
+        /* Individual Block Styles */
+        .block {
+            width: 100%;
+            aspect-ratio: 1;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .block:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
+        }
+
+        /* Block Color Classes */
+        .block.red { background: linear-gradient(135deg, #e74c3c, #c0392b); }
+        .block.blue { background: linear-gradient(135deg, #3498db, #2980b9); }
+        .block.green { background: linear-gradient(135deg, #2ecc71, #27ae60); }
+        .block.yellow { background: linear-gradient(135deg, #f1c40f, #f39c12); }
+        .block.purple { background: linear-gradient(135deg, #9b59b6, #8e44ad); }
+        .block.orange { background: linear-gradient(135deg, #e67e22, #d35400); }
+
+        /* Empty block styling */
+        .block.empty {
+            background: rgba(52, 73, 94, 0.3);
+            cursor: default;
+        }
+
+        .block.empty:hover {
+            transform: none;
+            box-shadow: none;
+        }
+
+        /* Animation Classes */
+        .block.exploding {
+            animation: explode 0.5s ease-out forwards;
+        }
+
+        .block.falling {
+            animation: fall 0.5s ease-out forwards;
+        }
+
+        @keyframes explode {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.5); opacity: 0.7; }
+            100% { transform: scale(0); opacity: 0; }
+        }
+
+        @keyframes fall {
+            0% { transform: translateY(-100px); opacity: 0; }
+            100% { transform: translateY(0); opacity: 1; }
+        }
+
+        /* Game Over Screen */
+        .game-over {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .game-over-content {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+        }
+
+        .game-over h2 {
+            color: #e74c3c;
+            font-size: 2em;
+            margin-bottom: 20px;
+        }
+
+        .final-score {
+            font-size: 1.5em;
+            color: #2c3e50;
+            margin-bottom: 20px;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 480px) {
+            .game-title { font-size: 2em; }
+            .game-info { 
+                flex-direction: column; 
+                gap: 15px;
+            }
+            .game-grid { 
+                gap: 2px; 
+                padding: 8px;
+            }
+            .btn { padding: 8px 16px; }
+        }
+
+        /* Hidden class for game over screen */
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <!-- Game Header -->
+        <div class="game-header">
+            <h1 class="game-title">Block Blast</h1>
+        </div>
+
+        <!-- Game Info Bar -->
+        <div class="game-info">
+            <div class="score">Score: <span id="score">0</span></div>
+            <div class="controls">
+                <button class="btn" onclick="newGame()">New Game</button>
+                <button class="btn" onclick="pauseGame()">Pause</button>
+            </div>
+        </div>
+
+        <!-- Game Grid -->
+        <div class="game-grid" id="gameGrid">
+            <!-- Grid cells will be generated by JavaScript -->
+        </div>
+    </div>
+
+    <!-- Game Over Screen -->
+    <div class="game-over hidden" id="gameOverScreen">
+        <div class="game-over-content">
+            <h2>Game Over!</h2>
+            <div class="final-score">Final Score: <span id="finalScore">0</span></div>
+            <button class="btn" onclick="newGame()">Play Again</button>
+        </div>
+    </div>
+
+    <script>
+        // Game Configuration and Variables
+        const GRID_SIZE = 8;
+        const COLORS = ['red', 'blue', 'green', 'yellow', 'purple', 'orange'];
+        let gameGrid = [];
+        let score = 0;
+        let isGamePaused = false;
+        let isProcessing = false; // Prevent multiple clicks during animations
+
+        // Initialize the game when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeGame();
+        });
+
+        /**
+         * Initialize the game by creating the grid and setting up initial state
+         */
+        function initializeGame() {
+            createGrid();
+            fillGrid();
+            renderGrid();
+            score = 0;
+            updateScore();
+            isGamePaused = false;
+            isProcessing = false;
+            document.getElementById('gameOverScreen').classList.add('hidden');
+        }
+
+        /**
+         * Create the HTML grid structure
+         */
+        function createGrid() {
+            const gridElement = document.getElementById('gameGrid');
+            gridElement.innerHTML = '';
+            
+            // Initialize 2D array for game state
+            gameGrid = [];
+            for (let row = 0; row < GRID_SIZE; row++) {
+                gameGrid[row] = [];
+                for (let col = 0; col < GRID_SIZE; col++) {
+                    // Create block element
+                    const block = document.createElement('div');
+                    block.className = 'block empty';
+                    block.dataset.row = row;
+                    block.dataset.col = col;
+                    block.addEventListener('click', () => handleBlockClick(row, col));
+                    gridElement.appendChild(block);
+                    
+                    // Initialize grid data
+                    gameGrid[row][col] = null;
+                }
+            }
+        }
+
+        /**
+         * Fill the grid with random colored blocks
+         */
+        function fillGrid() {
+            for (let row = 0; row < GRID_SIZE; row++) {
+                for (let col = 0; col < GRID_SIZE; col++) {
+                    if (gameGrid[row][col] === null) {
+                        gameGrid[row][col] = COLORS[Math.floor(Math.random() * COLORS.length)];
+                    }
+                }
+            }
+        }
+
+        /**
+         * Render the current game state to the HTML grid
+         */
+        function renderGrid() {
+            const blocks = document.querySelectorAll('.block');
+            blocks.forEach(block => {
+                const row = parseInt(block.dataset.row);
+                const col = parseInt(block.dataset.col);
+                const color = gameGrid[row][col];
+                
+                // Reset classes
+                block.className = 'block';
+                
+                if (color) {
+                    block.classList.add(color);
+                } else {
+                    block.classList.add('empty');
+                }
+            });
+        }
+
+        /**
+         * Handle block click events
+         */
+        function handleBlockClick(row, col) {
+            if (isGamePaused || isProcessing || !gameGrid[row][col]) {
+                return;
+            }
+
+            const color = gameGrid[row][col];
+            const connectedBlocks = findConnectedBlocks(row, col, color);
+
+            // Require at least 2 connected blocks to blast
+            if (connectedBlocks.length >= 2) {
+                isProcessing = true;
+                blastBlocks(connectedBlocks);
+            }
+        }
+
+        /**
+         * Find all blocks connected to the clicked block with the same color
+         */
+        function findConnectedBlocks(startRow, startCol, targetColor) {
+            const visited = new Set();
+            const connected = [];
+            const stack = [{row: startRow, col: startCol}];
+
+            while (stack.length > 0) {
+                const {row, col} = stack.pop();
+                const key = `${row}-${col}`;
+
+                if (visited.has(key)) continue;
+                if (row < 0 || row >= GRID_SIZE || col < 0 || col >= GRID_SIZE) continue;
+                if (gameGrid[row][col] !== targetColor) continue;
+
+                visited.add(key);
+                connected.push({row, col});
+
+                // Add adjacent blocks to stack
+                stack.push({row: row - 1, col}); // Up
+                stack.push({row: row + 1, col}); // Down
+                stack.push({row, col: col - 1}); // Left
+                stack.push({row, col: col + 1}); // Right
+            }
+
+            return connected;
+        }
+
+        /**
+         * Animate and remove the blasted blocks
+         */
+        function blastBlocks(blocks) {
+            // Add explosion animation
+            blocks.forEach(({row, col}) => {
+                const blockElement = document.querySelector(`[data-row="${row}"][data-col="${col}"]`);
+                blockElement.classList.add('exploding');
+            });
+
+            // Calculate score based on number of blocks
+            const points = blocks.length * 10 * blocks.length; // Bonus for larger groups
+            score += points;
+            updateScore();
+
+            // Remove blocks after animation
+            setTimeout(() => {
+                blocks.forEach(({row, col}) => {
+                    gameGrid[row][col] = null;
+                });
+                
+                applyGravity();
+                fillEmptySpaces();
+                
+                setTimeout(() => {
+                    renderGrid();
+                    isProcessing = false;
+                    checkGameOver();
+                }, 300);
+            }, 500);
+        }
+
+        /**
+         * Apply gravity - make blocks fall down
+         */
+        function applyGravity() {
+            for (let col = 0; col < GRID_SIZE; col++) {
+                // Collect all non-empty blocks in this column
+                const blocks = [];
+                for (let row = GRID_SIZE - 1; row >= 0; row--) {
+                    if (gameGrid[row][col] !== null) {
+                        blocks.push(gameGrid[row][col]);
+                    }
+                    gameGrid[row][col] = null;
+                }
+
+                // Place blocks at the bottom
+                for (let i = 0; i < blocks.length; i++) {
+                    gameGrid[GRID_SIZE - 1 - i][col] = blocks[i];
+                }
+            }
+        }
+
+        /**
+         * Fill empty spaces with new random blocks
+         */
+        function fillEmptySpaces() {
+            for (let col = 0; col < GRID_SIZE; col++) {
+                for (let row = 0; row < GRID_SIZE; row++) {
+                    if (gameGrid[row][col] === null) {
+                        gameGrid[row][col] = COLORS[Math.floor(Math.random() * COLORS.length)];
+                        
+                        // Add falling animation
+                        setTimeout(() => {
+                            const blockElement = document.querySelector(`[data-row="${row}"][data-col="${col}"]`);
+                            if (blockElement) {
+                                blockElement.classList.add('falling');
+                            }
+                        }, 100);
+                    }
+                }
+            }
+        }
+
+        /**
+         * Check if there are any valid moves left
+         */
+        function checkGameOver() {
+            for (let row = 0; row < GRID_SIZE; row++) {
+                for (let col = 0; col < GRID_SIZE; col++) {
+                    if (gameGrid[row][col]) {
+                        const connectedBlocks = findConnectedBlocks(row, col, gameGrid[row][col]);
+                        if (connectedBlocks.length >= 2) {
+                            return; // Game can continue
+                        }
+                    }
+                }
+            }
+            
+            // No valid moves found - game over
+            setTimeout(() => {
+                showGameOver();
+            }, 1000);
+        }
+
+        /**
+         * Display the game over screen
+         */
+        function showGameOver() {
+            document.getElementById('finalScore').textContent = score;
+            document.getElementById('gameOverScreen').classList.remove('hidden');
+        }
+
+        /**
+         * Update the score display
+         */
+        function updateScore() {
+            document.getElementById('score').textContent = score;
+        }
+
+        /**
+         * Start a new game
+         */
+        function newGame() {
+            initializeGame();
+        }
+
+        /**
+         * Pause/unpause the game
+         */
+        function pauseGame() {
+            isGamePaused = !isGamePaused;
+            const pauseBtn = document.querySelector('.controls .btn:nth-child(2)');
+            pauseBtn.textContent = isGamePaused ? 'Resume' : 'Pause';
+        }
+    </script>
+</body>
+</html>

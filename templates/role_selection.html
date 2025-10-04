@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome - Memorixal</title>
+    <style>
+        :root{
+            /* Modern Healthcare Color Palette - Matching Application */
+            --primary-color: #0ea5e9;
+            --primary-hover: #0284c7;
+            --primary-light: #e0f2fe;
+            --secondary-color: #64748b;
+            --accent-color: #10b981;
+            --accent-hover: #059669;
+            --success-color: #059669;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            
+            /* Background & Surface Colors */
+            --light-color: #f8fafc;
+            --bg-gradient: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            --dark-color: #1e293b;
+            --card-bg: #ffffff;
+            --card-hover: #fefefe;
+            
+            /* Text Colors */
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --text-light: #f8fafc;
+            --text-muted: #94a3b8;
+            
+            /* Border & Shadow */
+            --border-color: #e2e8f0;
+            --border-light: #f1f5f9;
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+            --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+            
+            /* Layout */
+            --border-radius: 16px;
+            --border-radius-sm: 8px;
+            --border-radius-lg: 24px;
+            
+            /* Transitions */
+            --transition-fast: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-normal: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-slow: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            
+            /* Legacy compatibility */
+            --sidebar-bg: #1e293b;
+        }
+
+        *{box-sizing:border-box;margin:0;padding:0}
+        html,body{height:100%}
+        
+        body{
+            font-family: 'Poppins', Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+            background: var(--bg-gradient);
+            color: var(--text-primary);
+            min-height:100vh;
+            display:flex;
+            flex-direction:column;
+            line-height: 1.6;
+        }
+
+        /* Navigation */
+        .navbar{
+            position:fixed;
+            top:0;
+            left:0;
+            right:0;
+            z-index:1000;
+            padding:20px 32px;
+            background:var(--card-bg);
+            box-shadow: var(--shadow-lg);
+            border-bottom:1px solid var(--border-light);
+            backdrop-filter: blur(8px);
+        }
+
+        .nav-container{
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            max-width:1200px;
+            margin:0 auto;
+            width:100%;
+        }
+
+        .nav-brand{
+            display:flex;
+            align-items:center;
+            gap:12px;
+            font-weight:700;
+            font-size:1.1rem;
+        }
+
+        .nav-logo{
+            width:48px;
+            height:48px;
+            border-radius:12px;
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            font-weight:700;
+            color:var(--text-light);
+            font-size:18px;
+            box-shadow: var(--shadow-md);
+        }
+
+        .nav-user{
+            display:flex;
+            align-items:center;
+            gap:1rem;
+            color:var(--text-primary);
+            font-weight:500;
+        }
+
+        .logout-btn{
+            padding:12px 24px;
+            border-radius:var(--border-radius);
+            border:2px solid var(--border-color);
+            background:var(--card-bg);
+            color:var(--text-primary);
+            font-weight:600;
+            cursor:pointer;
+            transition:var(--transition-fast);
+            text-decoration:none;
+            font-size:14px;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .logout-btn:hover{
+            background:var(--primary-light);
+            border-color:var(--primary-color);
+            color:var(--primary-color);
+            transform:translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        /* Main Content */
+        .main-content{
+            flex:1;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            padding:2rem;
+            margin-top:80px; /* Account for fixed navbar */
+        }
+
+        .welcome-container{
+            max-width:900px;
+            text-align:center;
+        }
+
+        .brand-section{
+            margin-bottom:3rem;
+        }
+
+        .main-logo{
+            width:96px;
+            height:96px;
+            border-radius:var(--border-radius-lg);
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            font-weight:700;
+            color:var(--text-light);
+            font-size:40px;
+            margin:0 auto 24px;
+            box-shadow: var(--shadow-xl);
+            animation: float 6s ease-in-out infinite;
+        }
+
+        @keyframes float{
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-8px) rotate(1deg); }
+        }
+
+        .brand-title{
+            font-size:48px;
+            font-weight:800;
+            margin-bottom:12px;
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .brand-subtitle{
+            color:var(--text-secondary);
+            font-size:1.2rem;
+            font-weight:500;
+            margin-bottom:1rem;
+        }
+
+        .welcome-text{
+            color:var(--text-secondary);
+            font-size:1.1rem;
+            line-height:1.6;
+            margin-bottom:3rem;
+        }
+
+        /* Portal Cards */
+        .portal-grid{
+            display:grid;
+            grid-template-columns:repeat(auto-fit, minmax(350px, 1fr));
+            gap:2rem;
+            margin-top:2rem;
+        }
+
+        .portal-card{
+            background:var(--card-bg);
+            border-radius:var(--border-radius-lg);
+            padding:40px;
+            border:2px solid var(--border-light);
+            box-shadow: var(--shadow-lg);
+            transition: var(--transition-normal);
+            text-decoration:none;
+            color:inherit;
+            display:block;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .portal-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+            transform: scaleX(0);
+            transition: var(--transition-normal);
+        }
+
+        .portal-card:hover{
+            transform:translateY(-12px) scale(1.03);
+            box-shadow: var(--shadow-xl);
+            border-color: var(--primary-color);
+            color:inherit;
+        }
+        
+        .portal-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .portal-icon{
+            width:80px;
+            height:80px;
+            border-radius:16px;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            margin:0 auto 1.5rem;
+            font-size:2.5rem;
+            transition:all 0.3s ease;
+        }
+
+        .patient-card .portal-icon{
+            background: linear-gradient(135deg, var(--accent-color), #34d399);
+            color:var(--text-light);
+            box-shadow: var(--shadow-md);
+        }
+
+        .caregiver-card .portal-icon{
+            background: linear-gradient(135deg, var(--primary-color), #3b82f6);
+            color:var(--text-light);
+            box-shadow: var(--shadow-md);
+        }
+
+        .portal-card:hover .portal-icon{
+            transform:scale(1.1) rotate(5deg);
+        }
+
+        .portal-title{
+            font-size:1.8rem;
+            font-weight:700;
+            margin-bottom:1rem;
+            color:var(--text-primary);
+        }
+
+        .portal-description{
+            color:var(--text-secondary);
+            font-size:1.05rem;
+            line-height:1.6;
+            margin-bottom:1.5rem;
+        }
+
+        .portal-features{
+            display:flex;
+            gap:8px;
+            flex-wrap:wrap;
+            justify-content:center;
+        }
+
+        .feature-tag{
+            background:var(--primary-light);
+            padding:8px 16px;
+            border-radius:var(--border-radius);
+            font-size:12px;
+            font-weight:600;
+            color:var(--primary-color);
+            border:1px solid var(--border-light);
+            transition: var(--transition-fast);
+        }
+        
+        .feature-tag:hover {
+            background: var(--primary-color);
+            color: var(--text-light);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px){
+            .navbar{
+                padding:1rem;
+            }
+            
+            .nav-container{
+                flex-direction:column;
+                gap:1rem;
+                align-items:flex-start;
+            }
+
+            .main-content{
+                margin-top:120px;
+                padding:1rem;
+            }
+
+            .portal-grid{
+                grid-template-columns:1fr;
+                gap:1.5rem;
+            }
+
+            .portal-card{
+                padding:2rem;
+            }
+
+            .brand-title{
+                font-size:2.2rem;
+            }
+
+            .welcome-text{
+                font-size:1rem;
+            }
+        }
+
+        @media (max-width: 480px){
+            .nav-container{
+                flex-direction:row;
+                justify-content:space-between;
+            }
+            
+            .nav-brand{
+                font-size:1rem;
+            }
+
+            .nav-user{
+                font-size:0.85rem;
+            }
+
+            .logout-btn{
+                padding:6px 16px;
+                font-size:0.85rem;
+            }
+        }
+
+        /* Loading animation for cards */
+        .portal-card{
+            animation: fadeInUp 0.6s ease-out forwards;
+        }
+
+        .portal-card:nth-child(2){
+            animation-delay: 0.1s;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <div class="nav-logo">M</div>
+                <span>Memorixal</span>
+            </div>
+            <div class="nav-user">
+                {% if username %}
+                <span>Welcome, <strong>{{ username }}</strong></span>
+                <a href="/logout" class="logout-btn">Logout</a>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="welcome-container">
+            <!-- Brand Section -->
+            <div class="brand-section">
+                <div class="main-logo">M</div>
+                <h1 class="brand-title">Memorixal</h1>
+                <p class="brand-subtitle">Healthcare Assistant</p>
+                <p class="welcome-text">
+                    Choose your portal to access personalized tools and resources designed for your role in cognitive wellness and healthcare management.
+                </p>
+            </div>
+
+            <!-- Portal Selection -->
+            <div class="portal-grid">
+                <!-- Patient Portal -->
+                <a href="/patient" class="portal-card patient-card">
+                    <div class="portal-icon">
+                        <i class="fas fa-user-injured"></i>
+                    </div>
+                    <h2 class="portal-title">Patient Portal</h2>
+                    <p class="portal-description">
+                        Access your personalized memory exercises, track your progress, and manage your cognitive wellness journey.
+                    </p>
+                    <div class="portal-features">
+                        <span class="feature-tag">Memory Games</span>
+                        <span class="feature-tag">Progress Tracking</span>
+                        <span class="feature-tag">Health Records</span>
+                    </div>
+                </a>
+
+                <!-- Healthcare Dashboard -->
+                <a href="/dashboard" class="portal-card caregiver-card">
+                    <div class="portal-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <h2 class="portal-title">Healthcare Dashboard</h2>
+                    <p class="portal-description">
+                        Comprehensive healthcare monitoring with real-time patient insights, progress tracking, and professional reporting tools.
+                    </p>
+                    <div class="portal-features">
+                        <span class="feature-tag">Real-time Monitoring</span>
+                        <span class="feature-tag">Progress Reports</span>
+                        <span class="feature-tag">AI Insights</span>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Font Awesome for icons -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js"></script>
+</body>
+</html>

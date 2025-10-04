@@ -1,0 +1,2246 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Patient Management System</title>
+  <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+  <link href="/static/css/theme.css" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <style>
+    :root {
+      /* Modern Healthcare Color Palette */
+      --primary-color: #0ea5e9;
+      --primary-hover: #0284c7;
+      --primary-light: #e0f2fe;
+      --secondary-color: #64748b;
+      --accent-color: #10b981;
+      --accent-hover: #059669;
+      --warning-color: #f59e0b;
+      --danger-color: #ef4444;
+      
+      /* Background & Surface Colors */
+      --bg-color: #f8fafc;
+      --bg-gradient: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+      --sidebar-bg: linear-gradient(180deg, #1e293b 0%, #334155 100%);
+      --card-bg: #ffffff;
+      --card-hover: #fefefe;
+      
+      /* Text Colors */
+      --text-primary: #1e293b;
+      --text-secondary: #64748b;
+      --text-light: #f8fafc;
+      --text-muted: #94a3b8;
+      
+      /* Border & Shadow */
+      --border-color: #e2e8f0;
+      --border-light: #f1f5f9;
+      --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+      --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+      --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+      --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+      
+      /* Layout */
+      --sidebar-width: 280px;
+      --border-radius: 16px;
+      --border-radius-sm: 8px;
+      --border-radius-lg: 24px;
+      
+      /* Transitions */
+      --transition-fast: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+      --transition-normal: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      --transition-slow: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    * { 
+      margin: 0; 
+      padding: 0; 
+      box-sizing: border-box; 
+      font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; 
+    }
+    html[lang="ar"] * { font-family: 'Tajawal', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+    
+    body { 
+      background: var(--bg-gradient);
+      color: var(--text-primary);
+      line-height: 1.6;
+      font-size: 14px;
+      overflow-x: hidden;
+    }
+
+    /* Modern Header Design */
+    .header { 
+      position: fixed; 
+      top: 0; 
+      left: 0; 
+      width: 100%; 
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      padding: 16px 32px; 
+      display: flex; 
+      justify-content: flex-end; 
+      align-items: center; 
+      border-bottom: 1px solid var(--border-light); 
+      z-index: 1000; 
+      transition: var(--transition-normal);
+      box-shadow: var(--shadow-sm);
+    }
+    
+    .header-buttons { 
+      display: flex; 
+      gap: 12px; 
+      align-items: center;
+    }
+    
+    .header-buttons button { 
+      background: var(--card-bg);
+      color: var(--text-secondary); 
+      border: 1px solid var(--border-color); 
+      border-radius: var(--border-radius-sm); 
+      padding: 10px 16px; 
+      display: flex; 
+      align-items: center; 
+      cursor: pointer; 
+      transition: var(--transition-fast); 
+      font-weight: 500;
+      font-size: 13px;
+      box-shadow: var(--shadow-sm);
+    }
+    
+    .header-buttons button:hover { 
+      background: var(--primary-light);
+      color: var(--primary-color);
+      border-color: var(--primary-color);
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-md);
+    }
+    
+    .header-buttons button i { 
+      margin-right: 8px; 
+      font-size: 16px;
+    }
+
+    /* Modern Sidebar Design */
+    .sidebar { 
+      width: var(--sidebar-width); 
+      background: var(--sidebar-bg); 
+      position: fixed; 
+      top: 0; 
+      left: 0; 
+      height: 100%; 
+      z-index: 1001; 
+      padding: 32px 20px; 
+      transition: var(--transition-normal);
+      box-shadow: var(--shadow-xl);
+      border-right: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .sidebar .nav-buttons { 
+      width: 100%; 
+      margin-top: 20px;
+    }
+    
+    .sidebar button { 
+      width: 100%; 
+      background: transparent; 
+      border: none; 
+      border-radius: var(--border-radius); 
+      padding: 16px 20px; 
+      margin-bottom: 12px; 
+      display: flex; 
+      align-items: center; 
+      color: rgba(255, 255, 255, 0.7); 
+      cursor: pointer; 
+      transition: var(--transition-fast); 
+      text-align: left;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .sidebar button::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 0;
+      height: 100%;
+      background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+      transition: var(--transition-normal);
+      z-index: -1;
+    }
+    
+    .sidebar button:hover { 
+      color: var(--text-light);
+      transform: translateX(4px);
+      box-shadow: var(--shadow-lg);
+    }
+    
+    .sidebar button:hover::before {
+      width: 100%;
+    }
+    
+    .sidebar button.active { 
+      background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+      color: var(--text-light); 
+      font-weight: 600;
+      box-shadow: var(--shadow-lg);
+      transform: translateX(4px);
+    }
+    
+    .sidebar button i { 
+      margin-right: 16px; 
+      min-width: 24px; 
+      text-align: center; 
+      font-size: 20px;
+      transition: var(--transition-fast);
+    }
+    
+    .sidebar button:hover i,
+    .sidebar button.active i {
+      transform: scale(1.1);
+    }
+    
+    .sidebar button span { 
+      font-size: 15px;
+      font-weight: 500;
+    }
+
+    /* Modern Toggle Button */
+    .sidebar-toggle-fab { 
+      position: fixed; 
+      top: 20px; 
+      left: calc(var(--sidebar-width) - 24px); 
+      z-index: 1002; 
+      width: 48px; 
+      height: 48px; 
+      background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+      color: var(--text-light); 
+      border-radius: 50%; 
+      border: 3px solid var(--card-bg); 
+      display: flex; 
+      justify-content: center; 
+      align-items: center; 
+      cursor: pointer; 
+      box-shadow: var(--shadow-lg); 
+      transition: var(--transition-normal);
+    }
+    .sidebar-toggle-fab:hover { 
+      transform: scale(1.1) rotate(180deg);
+      box-shadow: var(--shadow-xl);
+    }
+    .sidebar-toggle-fab i { 
+      font-size: 24px; 
+      transition: var(--transition-fast);
+    }
+
+    /* Modern Content Area */
+    .content { 
+      margin-left: var(--sidebar-width); 
+      padding: 100px 48px 40px; 
+      transition: var(--transition-normal);
+      min-height: 100vh;
+    }
+    
+    .view-container { 
+      max-width: 1400px; 
+      margin: 0 auto; 
+    }
+    
+    .activity-dashboard { 
+      display: none; 
+    }
+    
+    .page-header { 
+      margin-bottom: 32px; 
+      text-align: center;
+    }
+    
+    .page-header h1 { 
+      font-size: 32px; 
+      font-weight: 700; 
+      color: var(--text-primary);
+      background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 8px;
+    }
+    
+    /* Modern Interface Content */
+    .interface-content {
+      background: var(--card-bg);
+      border-radius: var(--border-radius-lg);
+      padding: 40px;
+      box-shadow: var(--shadow-lg);
+      border: 1px solid var(--border-light);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .interface-content::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+    }
+    
+    .feature-container { 
+      display: none;
+      animation: fadeIn 0.3s ease-in-out;
+    }
+    
+    .feature-container.active { 
+      display: block; 
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    /* Modern Chat UI */
+    .chat-container { 
+      display: flex; 
+      flex-direction: column; 
+      height: 65vh;
+      border-radius: var(--border-radius);
+      overflow: hidden;
+      box-shadow: var(--shadow-md);
+    }
+    
+    .chat-box { 
+      flex-grow: 1; 
+      overflow-y: auto; 
+      padding: 24px; 
+      background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+      margin-bottom: 0;
+      position: relative;
+    }
+    
+    .chat-box::-webkit-scrollbar {
+      width: 6px;
+    }
+    
+    .chat-box::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    
+    .chat-box::-webkit-scrollbar-thumb {
+      background: var(--border-color);
+      border-radius: 3px;
+    }
+    
+    .chat-message { 
+      display: flex; 
+      margin-bottom: 20px;
+      animation: slideIn 0.3s ease-out;
+    }
+    
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .chat-message.user { 
+      justify-content: flex-end; 
+    }
+    
+    .chat-message.bot .message-bubble { 
+      background: var(--card-bg);
+      color: var(--text-primary);
+      border: 1px solid var(--border-light);
+      box-shadow: var(--shadow-sm);
+    }
+    
+    .chat-message.user .message-bubble { 
+      background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+      color: var(--text-light);
+      box-shadow: var(--shadow-md);
+    }
+    
+    .message-bubble { 
+      max-width: 75%; 
+      padding: 16px 20px; 
+      border-radius: 20px; 
+      line-height: 1.6;
+      font-size: 14px;
+      position: relative;
+      word-wrap: break-word;
+    }
+    
+    .chat-input { 
+      display: flex;
+      padding: 20px;
+      background: var(--card-bg);
+      border-top: 1px solid var(--border-light);
+      gap: 12px;
+    }
+    .chat-input input { 
+      flex-grow: 1; 
+      border: 2px solid var(--border-color); 
+      background: var(--bg-color); 
+      border-radius: var(--border-radius); 
+      padding: 14px 18px; 
+      font-size: 14px; 
+      color: var(--text-primary);
+      transition: var(--transition-fast);
+    }
+    
+    .chat-input input:focus { 
+      outline: none; 
+      border-color: var(--primary-color);
+      background: var(--card-bg);
+      box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
+    }
+    
+    .chat-input button {
+      background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+      color: var(--text-light);
+      border: none;
+      border-radius: var(--border-radius);
+      padding: 0;
+      width: 48px;
+      height: 48px;
+      margin-left: 0;
+      cursor: pointer;
+      transition: var(--transition-fast);
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      box-shadow: var(--shadow-md);
+    }
+    
+    .chat-input button:hover { 
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-lg);
+    }
+    
+    .chat-input button.mic-btn {
+      background: var(--card-bg);
+      color: var(--text-secondary);
+      border: 2px solid var(--border-color);
+      margin-left: 0;
+    }
+    
+    .chat-input button.mic-btn:hover {
+      background: var(--primary-light);
+      color: var(--primary-color);
+      border-color: var(--primary-color);
+    }
+    html[dir="rtl"] .chat-message.user { justify-content: flex-start; }
+    html[dir="rtl"] .chat-input button { margin-left: 0; margin-right: 10px; }
+    html[dir="rtl"] .chat-input button.mic-btn {
+        margin-right: 0;
+    }
+
+    /* Modern Games UI */
+    .games-grid { 
+      display: grid; 
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); 
+      gap: 24px;
+      margin-bottom: 32px;
+    }
+    
+    .game-card { 
+      background: var(--card-bg);
+      border-radius: var(--border-radius-lg); 
+      padding: 32px 24px; 
+      text-align: center; 
+      cursor: pointer; 
+      transition: var(--transition-normal); 
+      border: 2px solid var(--border-light);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .game-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(14, 165, 233, 0.1), transparent);
+      transition: var(--transition-slow);
+    }
+    
+    .game-card:hover::before {
+      left: 100%;
+    }
+    
+    .game-card:hover { 
+      transform: translateY(-8px) scale(1.02);
+      box-shadow: var(--shadow-xl); 
+      border-color: var(--primary-color);
+    }
+    
+    .game-card i { 
+      font-size: 56px; 
+      color: var(--primary-color); 
+      margin-bottom: 20px;
+      transition: var(--transition-fast);
+    }
+    
+    .game-card:hover i {
+      transform: scale(1.1);
+      color: var(--accent-color);
+    }
+    
+    .game-card h3 { 
+      font-size: 18px; 
+      font-weight: 600; 
+      color: var(--text-primary);
+      margin-bottom: 8px;
+    }
+
+    /* Modern Breathing UI */
+    .breathing-container { 
+      text-align: center; 
+      padding: 48px 0;
+      background: linear-gradient(135deg, var(--primary-light) 0%, rgba(16, 185, 129, 0.1) 100%);
+      border-radius: var(--border-radius-lg);
+      margin: 24px 0;
+    }
+    
+    .breathing-circle { 
+      width: 240px; 
+      height: 240px; 
+      background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+      border-radius: 50%; 
+      margin: 40px auto; 
+      display: flex; 
+      justify-content: center; 
+      align-items: center; 
+      color: var(--text-light); 
+      font-size: 28px; 
+      font-weight: 700; 
+      transition: transform 4s ease-in-out;
+      box-shadow: var(--shadow-xl);
+      position: relative;
+    }
+    
+    .breathing-circle::before {
+      content: '';
+      position: absolute;
+      inset: -4px;
+      border-radius: 50%;
+      background: linear-gradient(45deg, var(--primary-color), var(--accent-color), var(--primary-color));
+      z-index: -1;
+      animation: rotate 3s linear infinite;
+    }
+    
+    @keyframes rotate {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    
+    .breathing-container.breathing .breathing-circle { 
+      transform: scale(1.4); 
+    }
+    
+    .breathing-instructions { 
+      font-size: 20px; 
+      color: var(--text-primary); 
+      margin-bottom: 32px;
+      font-weight: 500;
+    }
+    
+    .breathing-btn { 
+      background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+      color: var(--text-light); 
+      border: none; 
+      border-radius: var(--border-radius); 
+      padding: 16px 32px; 
+      font-size: 16px; 
+      font-weight: 600;
+      cursor: pointer; 
+      transition: var(--transition-fast);
+      box-shadow: var(--shadow-md);
+    }
+    
+    .breathing-btn:hover { 
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-lg);
+    }
+
+    /* AI Art UI */
+    .art-therapy-container { display: flex; flex-direction: column; gap: 20px; }
+    .art-prompt-input { display: flex; }
+    .art-prompt-input input { flex-grow: 1; border: 1px solid var(--border-color); background: var(--card-bg); border-radius: 8px; padding: 12px 15px; font-size: 15px; color: var(--text-primary); }
+    .art-prompt-input input:focus { outline: none; border-color: var(--primary-color); }
+    .art-prompt-input button { background-color: var(--primary-color); color: var(--text-light); border: none; border-radius: 8px; padding: 0 25px; margin-left: 10px; cursor: pointer; transition: background-color 0.2s ease; }
+    .art-prompt-input button:hover { background-color: var(--primary-hover); }
+    .art-display { width: 100%; aspect-ratio: 16 / 9; background-color: var(--bg-color); border-radius: 12px; display: flex; justify-content: center; align-items: center; color: var(--text-secondary); font-style: italic; border: 1px dashed var(--border-color); }
+    .art-display img { width: 100%; height: 100%; object-fit: cover; border-radius: 12px; }
+    html[dir="rtl"] .art-prompt-input button { margin-left: 0; margin-right: 10px; }
+
+    /* Storytelling UI */
+    .storytelling-container { display: flex; flex-direction: column; gap: 20px; }
+    .story-controls { display: flex; justify-content: center; align-items: center; gap: 15px; margin-bottom: 20px; flex-wrap: wrap; }
+    .story-controls button { background-color: transparent; border: 1px solid var(--border-color); border-radius: 50%; width: 60px; height: 60px; display: flex; justify-content: center; align-items: center; font-size: 28px; color: var(--text-secondary); cursor: pointer; transition: all 0.2s ease; }
+    .story-controls button:hover { background-color: var(--bg-color); color: var(--primary-color); }
+    .story-controls button.recording { background-color: #ef4444; color: var(--text-light); border-color: #ef4444; }
+    .story-playlist { max-height: 300px; overflow-y: auto; padding-right: 10px; }
+    .story-item { display: flex; align-items: center; justify-content: space-between; padding: 12px; border-radius: 8px; background-color: var(--bg-color); margin-bottom: 10px; }
+    .story-item:hover { background-color: #e2e8f0; }
+    .story-name { font-weight: 500; }
+    .story-date { font-size: 13px; color: var(--text-secondary); }
+    html[dir="rtl"] .story-playlist { padding-right: 0; padding-left: 10px; }
+
+    /* Feature Card UI */
+    .feature-card {
+      background: var(--card-bg);
+      border-radius: 12px;
+      padding: 30px;
+      box-shadow: var(--shadow-md);
+      border: 1px solid var(--border-color);
+      transition: all 0.3s ease;
+      text-align: center;
+    }
+    .feature-card:hover {
+      transform: translateY(-5px);
+      box-shadow: var(--shadow-lg);
+      border-color: var(--primary-color);
+    }
+    .feature-card a {
+      text-decoration: none;
+      color: inherit;
+      display: block;
+    }
+    .feature-card h3 {
+      font-size: 24px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 10px;
+    }
+    .feature-card p {
+      font-size: 16px;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+
+    /* Vision Aid UI */
+    .vision-aid-container { position: relative; width: 100%; background-color: #000; border-radius: 12px; overflow: hidden; }
+    .vision-aid-container video { width: 100%; display: block; }
+    .vision-aid-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; justify-content: center; align-items: flex-end; padding: 20px; background: linear-gradient(to top, rgba(0,0,0,0.6), transparent); }
+    .vision-aid-btn { background-color: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.4); color: white; width: 64px; height: 64px; border-radius: 50%; font-size: 32px; display: flex; justify-content: center; align-items: center; cursor: pointer; transition: background-color 0.2s ease; }
+    .vision-aid-btn:hover { background-color: rgba(255,255,255,0.4); }
+
+    .dashboard-controls { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; }
+    .report-btn { background-color: var(--primary-color); color: var(--text-light); border: none; border-radius: 8px; padding: 10px 20px; display: flex; align-items: center; cursor: pointer; transition: all 0.2s ease; font-weight: 500; }
+    .report-btn:hover { background-color: var(--primary-hover); }
+    .report-btn i { font-size: 18px; margin-right: 8px; }
+    .activities { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 25px; margin-top: 25px; }
+    .card { background: var(--card-bg); border-radius: 12px; padding: 25px; border: 1px solid var(--border-color); transition: all 0.3s ease; }
+    .card:hover { transform: translateY(-5px); box-shadow: var(--shadow-md); border-color: var(--primary-color); }
+    .card i { font-size: 36px; color: var(--primary-color); margin-bottom: 15px; }
+    .card h3 { font-size: 18px; font-weight: 600; margin-bottom: 8px; text-align: left; }
+    .card p { font-size: 14px; color: var(--text-secondary); text-align: left; }
+    .report-section { background: var(--card-bg); border-radius: 12px; padding: 25px; box-shadow: var(--shadow-md); margin-top: 25px; border: 1px solid var(--border-color); display: none; }
+    .report-section.show { display: block; }
+    .report-section h2 { font-size: 20px; padding-bottom: 10px; margin-bottom: 15px; border-bottom: 1px solid var(--border-color); }
+    .report-content { white-space: pre-wrap; color: var(--text-secondary); line-height: 1.7; margin-bottom: 20px; }
+    .download-btn { background-color: var(--sidebar-bg); color: var(--text-light); border: none; border-radius: 8px; padding: 10px 20px; font-weight: 500; cursor: pointer; transition: all 0.2s ease; margin-right: 10px; }
+    .download-btn:hover { background-color: #334155; }
+    .report-actions { display: flex; gap: 10px; margin-top: 15px; }
+    .loading-spinner { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px; color: var(--text-secondary); }
+    .loading-spinner i { font-size: 32px; margin-bottom: 10px; }
+    .card.clickable { cursor: pointer; position: relative; }
+    .card.clickable:hover { transform: translateY(-8px); box-shadow: 0 8px 25px rgba(0,0,0,0.15); }
+    .card.clickable::after { content: 'Click to open'; position: absolute; top: 10px; right: 10px; background: var(--primary-color); color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px; opacity: 0; transition: opacity 0.3s ease; }
+    .card.clickable:hover::after { opacity: 1; }
+    .modal { display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); }
+    .modal-content { background-color: var(--card-bg); margin: 5% auto; padding: 30px; border-radius: 12px; width: 80%; max-width: 800px; max-height: 80vh; overflow-y: auto; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid var(--border-color); }
+    .modal-close { background: none; border: none; font-size: 28px; cursor: pointer; color: var(--text-secondary); }
+    .modal-close:hover { color: var(--text-primary); }
+
+    /* Dashboard layout separation */
+    .dashboard-grid { display: grid; grid-template-columns: 2fr 1.2fr; gap: 25px; align-items: start; }
+    .dashboard-main { display: flex; flex-direction: column; gap: 25px; }
+    .dashboard-side { position: relative; }
+    .vision-aid-section { position: sticky; top: 90px; }
+    .vision-aid-section .vision-aid-container { border-radius: 12px; overflow: hidden; }
+    @media (max-width: 1024px) {
+      .dashboard-grid { grid-template-columns: 1fr; }
+      .vision-aid-section { position: static; }
+    }
+
+    body.sidebar-collapsed .sidebar { transform: translateX(calc(-1 * var(--sidebar-width))); }
+    body.sidebar-collapsed .content, body.sidebar-collapsed .header { margin-left: 0; }
+    body.sidebar-collapsed .sidebar-toggle-fab { left: 15px; }
+    body.dashboard-view-active .sidebar, body.dashboard-view-active .sidebar-toggle-fab { display: none; }
+    body.dashboard-view-active .content, body.dashboard-view-active .header { margin-inline-start: 0; }
+
+    html[dir="rtl"] { text-align: right; }
+    html[dir="rtl"] .header { left: auto; right: 0; }
+    html[dir="rtl"] .sidebar { left: auto; right: 0; }
+    html[dir="rtl"] .content { margin-left: 0; margin-right: var(--sidebar-width); }
+    html[dir="rtl"] .sidebar-toggle-fab { left: auto; right: calc(var(--sidebar-width) - 22px); }
+    html[dir="rtl"] body.sidebar-collapsed .sidebar { transform: translateX(var(--sidebar-width)); }
+    html[dir="rtl"] body.sidebar-collapsed .content, html[dir="rtl"] body.sidebar-collapsed .header { margin-right: 0; }
+    html[dir="rtl"] body.sidebar-collapsed .sidebar-toggle-fab { right: 15px; }
+    html[dir="rtl"] .header-buttons button i, html[dir="rtl"] .report-btn i, html[dir="rtl"] .sidebar button i { margin-right: 0; margin-left: 15px; }
+    html[dir="rtl"] .sidebar button, html[dir="rtl"] .card h3, html[dir="rtl"] .card p { text-align: right; }
+
+    /* Enhanced Mobile Responsiveness */
+    @media (max-width: 768px) {
+      :root {
+        --sidebar-width: 260px;
+      }
+      
+      .header {
+        padding: 12px 20px;
+        backdrop-filter: blur(10px);
+      }
+      
+      .content {
+        padding: 90px 20px 30px;
+      }
+      
+      .page-header h1 {
+        font-size: 28px;
+      }
+      
+      .interface-content {
+        padding: 24px;
+        border-radius: var(--border-radius);
+      }
+      
+      .chat-container { 
+        height: 60vh; 
+      }
+      
+      .chat-box { 
+        padding: 20px; 
+      }
+      
+      .chat-input {
+        padding: 16px;
+        gap: 8px;
+      }
+      
+      .chat-input input { 
+        padding: 12px 16px;
+        font-size: 14px;
+      }
+      
+      .chat-input button { 
+        width: 44px;
+        height: 44px;
+        font-size: 18px;
+      }
+
+      .games-grid { 
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); 
+        gap: 20px; 
+      }
+      
+      .game-card {
+        padding: 24px 20px;
+      }
+      
+      .game-card i { 
+        font-size: 48px; 
+      }
+      
+      .game-card h3 { 
+        font-size: 16px; 
+      }
+
+      .breathing-circle { 
+        width: 180px; 
+        height: 180px; 
+        font-size: 24px; 
+      }
+      
+      .breathing-instructions { 
+        font-size: 18px; 
+      }
+
+      .art-prompt-input input { 
+        padding: 12px 16px; 
+      }
+      
+      .art-prompt-input button { 
+        padding: 0 20px; 
+      }
+
+      .story-controls button { width: 50px; height: 50px; font-size: 24px; }
+
+      .dashboard-controls {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .activities {
+        grid-template-columns: 1fr;
+      }
+      .sidebar {
+        transform: translateX(calc(-1 * var(--sidebar-width)));
+        box-shadow: 0 0 20px rgba(0,0,0,0.2);
+      }
+      .content, .header {
+        margin-inline-start: 0 !important;
+      }
+      .sidebar-toggle-fab {
+        left: 15px !important;
+      }
+      body.sidebar-collapsed .sidebar {
+        transform: translateX(0);
+      }
+      body.sidebar-collapsed .sidebar-toggle-fab {
+        left: calc(var(--sidebar-width) - 22px) !important;
+      }
+      html[dir="rtl"] .sidebar {
+        transform: translateX(var(--sidebar-width));
+      }
+      html[dir="rtl"] .sidebar-toggle-fab {
+        right: 15px !important;
+        left: auto !important;
+      }
+      html[dir="rtl"] body.sidebar-collapsed .sidebar {
+        transform: translateX(0);
+      }
+      html[dir="rtl"] body.sidebar-collapsed .sidebar-toggle-fab {
+        right: calc(var(--sidebar-width) - 22px) !important;
+        left: auto !important;
+      }
+      .header-buttons button span {
+        display: none;
+      }
+      .header-buttons button {
+        padding: 8px 12px;
+      }
+      .header-buttons button i {
+        margin-right: 0;
+      }
+      html[dir="rtl"] .header-buttons button i {
+        margin-left: 0;
+      }
+    }
+  </style>
+</head>
+<body class="">
+
+  <div class="sidebar" id="sidebar">
+    <div class="nav-buttons">
+      <button class="active" id="caregivers" data-target="caregivers-content"><i class='bx bx-bot'></i><span data-key="caregivers">Personal Caregiver</span></button>
+      <button id="games" data-target="games-content"><i class='bx bx-joystick'></i><span data-key="games">Mind Games</span></button>
+      <button id="breathing" data-target="breathing-content"><i class='bx bx-spa'></i><span data-key="breathing">Relaxation Breathing</span></button>
+      <button id="aiart" data-target="aiart-content"><i class='bx bx-paint'></i><span data-key="aiart">AI Art Therapy</span></button>
+      <button id="stories" data-target="stories-content"><i class='bx bx-book-open'></i><span data-key="stories">Memory Storytelling</span></button>
+    </div>
+  </div>
+
+  <button class="sidebar-toggle-fab" id="sidebar-toggle"><i class='bx bx-menu-alt-left'></i></button>
+
+  <header class="header">
+    <div class="header-buttons">
+      <button id="language-toggle"><i class='bx bx-globe'></i><span data-key="langBtn">English</span></button>
+      <!-- updated back button style to match language selector button -->
+      <button id="back-to-role-btn" onclick="navigateToRoleSelection()"><i class='bx bx-arrow-back'></i><span>Back to Role Select</span></button>
+    </div>
+  </header>
+
+  <main class="content" id="content">
+    <div class="patient-interface view-container">
+      <div class="page-header"><h1 id="page-header-title" data-key="pageHeader">Personal Caregiver</h1></div>
+      <div class="interface-content">
+        <div id="caregivers-content" class="feature-container active">
+          <!-- Embed the full Caregiver Chatbot UI via iframe so its scripts and voice features work as designed -->
+          <iframe id="caregiver-chat-iframe" src="/chatbot" title="Personal Caregiver Chatbot" style="width:100%; height:80vh; border:2px solid var(--border-light); border-radius:var(--border-radius-lg); background:var(--card-bg); box-shadow:var(--shadow-lg);"></iframe>
+        </div>
+        <div id="games-content" class="feature-container">
+          <div class="games-grid" id="games-grid">
+            <div class="game-card" data-url="/games/Domino"><h3>Domino</h3></div>
+            <div class="game-card" data-url="/games/memory_card"><h3>Memory Card</h3></div>
+            <div class="game-card" data-url="/games/Simon"><h3>Simon</h3></div>
+            <div class="game-card" data-url="/games/jig"><h3>Jig</h3></div>
+            <div class="game-card" data-url="/games/block_blast"><h3>Block Blast</h3></div>
+          </div>
+            <div style="margin-top:16px;">
+            <iframe id="games-iframe" src="/games" title="Embedded mini-games" style="width:100%; height:70vh; border:2px solid var(--border-light); border-radius:var(--border-radius-lg); background:var(--card-bg); box-shadow:var(--shadow-lg);"></iframe>
+          </div>
+        </div>
+    <div id="breathing-content" class="feature-container">
+      <iframe id="relaxation-iframe" src="/relaxation" title="Relaxation exercises" style="width:100%; height:80vh; border:2px solid var(--border-light); border-radius:var(--border-radius-lg); background:var(--card-bg); box-shadow:var(--shadow-lg);"></iframe>
+    </div>
+    <div id="aiart-content" class="feature-container">
+      <!-- Embedded AI Art UI (originally templates/ai_art/index.html) -->
+      <div class="ai-art-embedded">
+      <style>
+        /* Embedded AI Art styles (scoped) */
+        /* Keep these styles scoped under .ai-art-embedded to reduce conflicts */
+        .ai-art-embedded * { box-sizing: border-box; }
+        .ai-art-embedded .container {
+        max-width: 1400px; margin: 0 auto; padding: 32px;
+        }
+        .ai-art-embedded header { 
+            text-align: center; 
+            margin-bottom: 40px; 
+            background: var(--card-bg); 
+            padding: 40px; 
+            border-radius: var(--border-radius-lg); 
+            box-shadow: var(--shadow-lg);
+            border: 1px solid var(--border-light);
+            position: relative;
+        }
+        .ai-art-embedded header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+        }
+        .ai-art-embedded header h1 { 
+            font-size: 32px; 
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 12px; 
+        }
+        .ai-art-embedded header p {
+            color: var(--text-secondary);
+            font-size: 16px;
+            font-weight: 500;
+        }
+        .ai-art-embedded .main-content { display: grid; grid-template-columns: 300px 1fr 300px; gap: 24px; margin-bottom: 40px; }
+        .ai-art-embedded .tools-panel, .ai-art-embedded .ai-panel, .ai-art-embedded .gallery-section, .ai-art-embedded .canvas-container, .ai-art-embedded .result-panel { 
+            background: var(--card-bg); 
+            padding: 24px; 
+            border-radius: var(--border-radius-lg); 
+            box-shadow: var(--shadow-lg);
+            border: 1px solid var(--border-light);
+        }
+        .ai-art-embedded .tool-btn, .ai-art-embedded .action-btn { 
+            width: 100%; 
+            padding: 14px 18px; 
+            font-size: 14px; 
+            font-weight: 500;
+            border: 2px solid var(--border-color); 
+            background: var(--bg-color); 
+            border-radius: var(--border-radius); 
+            cursor: pointer; 
+            margin-bottom: 12px;
+            transition: var(--transition-fast);
+            color: var(--text-primary);
+        }
+        .ai-art-embedded .tool-btn:hover, .ai-art-embedded .action-btn:hover {
+            background: var(--primary-light);
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+            transform: translateY(-1px);
+        }
+        .ai-art-embedded .tool-btn.active {
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+            color: var(--text-light);
+            border-color: var(--primary-color);
+        }
+        .ai-art-embedded .clear-btn { 
+            background: linear-gradient(135deg, var(--danger-color), #f87171); 
+            color: var(--text-light); 
+            border-color: var(--danger-color); 
+        }
+        .ai-art-embedded .clear-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+        .ai-art-embedded .slider { width: 100%; }
+        .ai-art-embedded .color-btn { 
+            width: 48px; 
+            height: 48px; 
+            border-radius: var(--border-radius); 
+            border: 2px solid var(--border-color); 
+            cursor: pointer;
+            transition: var(--transition-fast);
+        }
+        .ai-art-embedded .color-btn:hover {
+            transform: scale(1.1);
+            box-shadow: var(--shadow-md);
+        }
+        .ai-art-embedded .color-btn.active {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(14, 165, 233, 0.2);
+        }
+        .ai-art-embedded #drawing-canvas { 
+            border: 2px solid var(--border-color); 
+            border-radius: var(--border-radius); 
+            display: block; 
+            margin: 0 auto; 
+            max-width: 100%; 
+            height: auto;
+            box-shadow: var(--shadow-sm);
+        }
+        .ai-art-embedded .description-input { 
+            width: 100%; 
+            padding: 14px 18px; 
+            border-radius: var(--border-radius); 
+            border: 2px solid var(--border-color);
+            background: var(--bg-color);
+            color: var(--text-primary);
+            font-size: 14px;
+            transition: var(--transition-fast);
+        }
+        .ai-art-embedded .description-input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            background: var(--card-bg);
+            box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
+        }
+        .ai-art-embedded .style-btn, .ai-art-embedded .process-btn, .ai-art-embedded .generate-btn { 
+            padding: 14px 18px; 
+            border-radius: var(--border-radius); 
+            cursor: pointer;
+            font-weight: 600;
+            transition: var(--transition-fast);
+            border: none;
+        }
+        .ai-art-embedded .style-btn {
+            background: var(--bg-color);
+            color: var(--text-primary);
+            border: 2px solid var(--border-color);
+        }
+        .ai-art-embedded .style-btn:hover {
+            background: var(--primary-light);
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+        .ai-art-embedded .style-btn.active {
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+            color: var(--text-light);
+            border-color: var(--primary-color);
+        }
+        .ai-art-embedded .process-btn { 
+            background: linear-gradient(135deg, var(--warning-color), #fbbf24); 
+            color: var(--text-light);
+        }
+        .ai-art-embedded .process-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+        .ai-art-embedded .generate-btn { 
+            background: linear-gradient(135deg, var(--accent-color), #34d399); 
+            color: var(--text-light);
+        }
+        .ai-art-embedded .generate-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+        .ai-art-embedded .loading { 
+            text-align: center; 
+            padding: 20px;
+            color: var(--text-secondary);
+        }
+        .ai-art-embedded .spinner { 
+            width: 40px; 
+            height: 40px; 
+            border: 4px solid var(--border-light); 
+            border-top: 4px solid var(--primary-color); 
+            border-radius: 50%; 
+            animation: spin 1s linear infinite; 
+            margin: 0 auto 12px; 
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .ai-art-embedded .results-section { 
+            display: grid; 
+            grid-template-columns: 1fr 1fr; 
+            gap: 24px; 
+            margin-top: 32px; 
+        }
+        .ai-art-embedded .result-image { 
+            max-width: 100%; 
+            max-height: 300px; 
+            border-radius: var(--border-radius); 
+            box-shadow: var(--shadow-md);
+        }
+        .ai-art-embedded .gallery-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); 
+            gap: 20px; 
+        }
+        .ai-art-embedded .gallery-item { 
+            padding: 16px; 
+            border-radius: var(--border-radius); 
+            background: var(--card-bg); 
+            box-shadow: var(--shadow-md);
+            border: 1px solid var(--border-light);
+            transition: var(--transition-fast);
+        }
+        .ai-art-embedded .gallery-item:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
+        }
+        .ai-art-embedded .hidden { display: none !important; }
+        .ai-art-embedded h2, .ai-art-embedded h3 {
+            color: var(--text-primary);
+            font-weight: 600;
+            margin-bottom: 16px;
+        }
+        .ai-art-embedded .placeholder {
+            color: var(--text-muted);
+            font-style: italic;
+            padding: 40px 20px;
+            text-align: center;
+            background: var(--bg-color);
+            border-radius: var(--border-radius);
+            border: 2px dashed var(--border-color);
+        }
+        @media (max-width: 1200px) { 
+            .ai-art-embedded .main-content { 
+                grid-template-columns: 1fr; 
+                gap: 20px;
+            } 
+        }
+      </style>
+
+      <div class="container">
+        <header>
+          <h1>✏️ Drawing Assistant</h1>
+          <p style="margin-top:6px; color: #666;">Create beautiful art with simple drawings</p>
+        </header>
+
+        <div class="main-content">
+          <!-- Tools -->
+          <div class="tools-panel">
+            <h2 style="font-size:1.1em; margin-bottom:10px;">Drawing Tools</h2>
+            <div style="margin-bottom:12px;">
+              <button id="pen-tool" class="tool-btn active" data-tool="pen">✏️ Draw</button>
+              <button id="eraser-tool" class="tool-btn" data-tool="eraser">🧽 Erase</button>
+            </div>
+            <div style="margin-bottom:12px;"><label for="brush-size">Brush Size:</label>
+              <input type="range" id="brush-size" min="2" max="20" value="5" class="slider">
+              <div style="font-size:0.9em; margin-top:6px;" id="brush-size-display">5</div>
+            </div>
+            <div style="margin-bottom:12px;"><label for="color-picker">Color:</label>
+              <div style="display:flex; gap:8px; margin-top:8px;">
+                <button class="color-btn active" data-color="#000000" style="background:#000;"></button>
+                <button class="color-btn" data-color="#FF0000" style="background:#f00;"></button>
+                <button class="color-btn" data-color="#00FF00" style="background:#0f0;"></button>
+                <button class="color-btn" data-color="#0000FF" style="background:#00f;"></button>
+                <button class="color-btn" data-color="#FFD700" style="background:#ffd700;"></button>
+                <button class="color-btn" data-color="#FF69B4" style="background:#ff69b4;"></button>
+              </div>
+            </div>
+            <div>
+              <button id="clear-canvas" class="action-btn clear-btn">🗑️ Clear All</button>
+            </div>
+          </div>
+
+          <!-- Canvas -->
+          <div class="canvas-container">
+            <canvas id="drawing-canvas" width="800" height="600"></canvas>
+            <div id="canvas-instructions" style="margin-top:10px; color:#666;">Click and drag to draw, or touch and drag on mobile devices</div>
+          </div>
+
+          <!-- AI Panel -->
+          <div class="ai-panel">
+            <h2 style="font-size:1.1em; margin-bottom:10px;">Create Beautiful Art</h2>
+            <div style="margin-bottom:12px;"><label for="drawing-description">What did you draw?</label>
+              <input type="text" id="drawing-description" placeholder="A flower, a house, a person..." class="description-input">
+            </div>
+            <div style="margin-bottom:12px;">
+              <label for="ai-art-style-group">Art Style:</label>
+              <div id="ai-art-style-group" style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:8px;">
+                <button class="style-btn active" data-style="realistic">📷 Realistic</button>
+                <button class="style-btn" data-style="cartoon">🎨 Cartoon</button>
+                <button class="style-btn" data-style="anime">✨ Anime</button>
+                <button class="style-btn" data-style="artistic">🖼️ Artistic</button>
+              </div>
+            </div>
+            <div>
+              <button id="process-drawing" class="process-btn">🔄 Process Drawing</button>
+              <button id="generate-art" class="generate-btn" style="margin-top:8px;">✨ Create Beautiful Art</button>
+            </div>
+            <div id="loading" class="loading hidden"><div class="spinner"></div><div style="color:#666;">Creating your beautiful art...</div></div>
+          </div>
+        </div>
+
+        <div class="results-section">
+          <div class="result-panel" id="processed-result">
+            <h3 style="margin-bottom:8px;">Processed Drawing</h3>
+            <div style="min-height:120px; display:flex; align-items:center; justify-content:center;">
+              <img id="processed-image" class="result-image hidden" alt="Processed drawing">
+              <div class="placeholder">Your processed drawing will appear here</div>
+            </div>
+          </div>
+          <div class="result-panel" id="generated-result">
+            <h3 style="margin-bottom:8px;">Generated Art</h3>
+            <div style="min-height:120px; display:flex; align-items:center; justify-content:center;">
+              <img id="generated-image" class="result-image hidden" alt="Generated art">
+              <div class="placeholder">Your beautiful generated art will appear here</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="gallery-section">
+          <h2 style="text-align:center; margin-bottom:12px;">Your Artwork Gallery</h2>
+          <div id="gallery" class="gallery-grid">
+            <div class="gallery-placeholder">Your saved artworks will appear here</div>
+          </div>
+        </div>
+      </div>
+
+      <script>
+      // Embedded DrawingApp (from templates/ai_art/index.html)
+      class DrawingApp {
+        constructor() {
+          this.canvas = document.getElementById('drawing-canvas');
+          this.ctx = this.canvas.getContext('2d');
+          this.isDrawing = false;
+          this.currentTool = 'pen';
+          this.currentColor = '#000000';
+          this.currentSize = 5;
+          this.lastX = 0;
+          this.lastY = 0;
+          this.initializeCanvas();
+          this.setupEventListeners();
+          this.setupTouchSupport();
+        }
+
+        initializeCanvas() {
+          this.ctx.fillStyle = 'white';
+          this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+          this.ctx.lineCap = 'round';
+          this.ctx.lineJoin = 'round';
+          this.ctx.strokeStyle = this.currentColor;
+          this.ctx.lineWidth = this.currentSize;
+        }
+
+        setupEventListeners() {
+          document.querySelectorAll('.tool-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+              document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('active'));
+              e.currentTarget.classList.add('active');
+              this.currentTool = e.currentTarget.dataset.tool;
+              this.updateCursor();
+            });
+          });
+
+          document.querySelectorAll('.color-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+              document.querySelectorAll('.color-btn').forEach(b => b.classList.remove('active'));
+              e.currentTarget.classList.add('active');
+              this.currentColor = e.currentTarget.dataset.color;
+              this.ctx.strokeStyle = this.currentColor;
+            });
+          });
+
+          const brushSize = document.getElementById('brush-size');
+          const brushDisplay = document.getElementById('brush-size-display');
+          brushSize.addEventListener('input', (e) => { this.currentSize = e.target.value; this.ctx.lineWidth = this.currentSize; brushDisplay.textContent = this.currentSize; });
+
+          document.getElementById('clear-canvas').addEventListener('click', () => { this.clearCanvas(); });
+
+          document.querySelectorAll('.style-btn').forEach(btn => { btn.addEventListener('click', (e) => { document.querySelectorAll('.style-btn').forEach(b => b.classList.remove('active')); e.currentTarget.classList.add('active'); }); });
+
+          document.getElementById('process-drawing').addEventListener('click', () => { this.processDrawing(); });
+          document.getElementById('generate-art').addEventListener('click', () => { this.generateArt(); });
+
+          this.canvas.addEventListener('mousedown', this.startDrawing.bind(this));
+          this.canvas.addEventListener('mousemove', this.draw.bind(this));
+          this.canvas.addEventListener('mouseup', this.stopDrawing.bind(this));
+          this.canvas.addEventListener('mouseout', this.stopDrawing.bind(this));
+        }
+
+        setupTouchSupport() {
+          // Use real touch events (pass the event through to unified pointer mapping)
+          this.canvas.addEventListener('touchstart', (e) => { e.preventDefault(); this.startDrawing(e); });
+          this.canvas.addEventListener('touchmove', (e) => { e.preventDefault(); this.draw(e); });
+          this.canvas.addEventListener('touchend', (e) => { e.preventDefault(); this.stopDrawing(); });
+        }
+
+        // Map different event types (mouse, touch) into canvas pixel coordinates
+        getPointerPos(e) {
+          const rect = this.canvas.getBoundingClientRect();
+          const scaleX = this.canvas.width / rect.width;    // relationship bitmap vs. element for X
+          const scaleY = this.canvas.height / rect.height;  // relationship bitmap vs. element for Y
+
+          // Touch event
+          if (e.touches && e.touches.length) {
+            const t = e.touches[0];
+            const x = (t.clientX - rect.left) * scaleX;
+            const y = (t.clientY - rect.top) * scaleY;
+            return { x, y };
+          }
+
+          // Pointer / mouse event with clientX/Y
+          if (typeof e.clientX !== 'undefined') {
+            const x = (e.clientX - rect.left) * scaleX;
+            const y = (e.clientY - rect.top) * scaleY;
+            return { x, y };
+          }
+
+          // Fallback for synthetic events that may include offsetX/offsetY
+          if (typeof e.offsetX !== 'undefined' && typeof e.offsetY !== 'undefined') {
+            // offset values are relative to element's CSS pixels, convert to canvas pixels
+            return { x: e.offsetX * scaleX, y: e.offsetY * scaleY };
+          }
+
+          return { x: 0, y: 0 };
+        }
+
+        updateCursor() { this.canvas.style.cursor = this.currentTool === 'pen' ? 'crosshair' : 'grab'; }
+
+        startDrawing(e) {
+          this.isDrawing = true;
+          const pos = this.getPointerPos(e);
+          this.lastX = pos.x;
+          this.lastY = pos.y;
+          if (this.currentTool === 'eraser') {
+            this.ctx.globalCompositeOperation = 'destination-out';
+          } else {
+            this.ctx.globalCompositeOperation = 'source-over';
+            this.ctx.strokeStyle = this.currentColor;
+          }
+          this.ctx.lineWidth = this.currentSize;
+          
+          // Track drawing interaction
+          if (typeof trackActivityInteraction === 'function') {
+            trackActivityInteraction('drawing_start');
+          }
+        }
+
+        draw(e) {
+          if (!this.isDrawing) return;
+          const pos = this.getPointerPos(e);
+          this.ctx.beginPath();
+          this.ctx.moveTo(this.lastX, this.lastY);
+          this.ctx.lineTo(pos.x, pos.y);
+          this.ctx.stroke();
+          this.lastX = pos.x;
+          this.lastY = pos.y;
+        }
+
+        stopDrawing() { this.isDrawing = false; }
+
+        clearCanvas() { if (confirm('Clear all your drawing? This cannot be undone.')) { this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height); this.initializeCanvas(); document.getElementById('processed-image').classList.add('hidden'); document.getElementById('generated-image').classList.add('hidden'); } }
+
+        async processDrawing() {
+          try { this.showLoading(true); this.canvas.toBlob(async (blob) => {
+            const formData = new FormData(); formData.append('file', blob, 'drawing.png');
+            const response = await fetch('/ai_art/process_drawing', { method: 'POST', body: formData });
+            const result = await response.json();
+            if (result.status === 'success') { const processedImg = document.getElementById('processed-image'); processedImg.src = result.processed_image; processedImg.classList.remove('hidden'); this.showMessage('✅ Drawing processed successfully!', 'success'); } else { this.showMessage('❌ Error processing drawing. Please try again.', 'error'); }
+            this.showLoading(false);
+          }, 'image/png'); } catch (error) { console.error(error); this.showMessage('❌ Error processing drawing. Please try again.', 'error'); this.showLoading(false); }
+        }
+
+        async generateArt() {
+          try {
+            const description = document.getElementById('drawing-description').value.trim();
+            if (!description) { this.showMessage('⚠️ Please describe what you drew first!', 'warning'); return; }
+            this.showLoading(true);
+            const activeStyle = document.querySelector('.style-btn.active'); const style = activeStyle ? activeStyle.dataset.style : 'realistic';
+            
+            // Track art generation interaction
+            if (typeof trackActivityInteraction === 'function') {
+              trackActivityInteraction('art_generation');
+            }
+            
+            this.canvas.toBlob(async (blob) => {
+              const formData = new FormData(); formData.append('drawing', blob, 'drawing.png'); formData.append('description', description); formData.append('style', style);
+              const response = await fetch('/ai_art/generate_image', { method: 'POST', body: formData });
+              const result = await response.json();
+              if (result.status === 'success') { 
+                const generatedImg = document.getElementById('generated-image'); 
+                generatedImg.src = result.generated_image; 
+                generatedImg.classList.remove('hidden'); 
+                this.addToGallery(result.generated_image, description, style); 
+                this.showMessage('✨ Beautiful art created successfully!', 'success'); 
+                
+                // Submit art therapy results
+                if (typeof window.submitArtResults === 'function') {
+                  window.submitArtResults({
+                    duration: 5, // Estimated time for art generation
+                    data: {
+                      art_type: 'ai_generated',
+                      description: description,
+                      style: style,
+                      creativity_score: 85,
+                      colors_used: 5,
+                      complexity_level: 'medium',
+                      emotional_expression: 'positive'
+                    },
+                    score: 90,
+                    notes: `Generated art: ${description} in ${style} style`
+                  });
+                }
+              } else { 
+                this.showMessage('❌ Error creating art. Please try again.', 'error'); 
+              }
+              this.showLoading(false);
+            }, 'image/png');
+          } catch (error) { console.error(error); this.showMessage('❌ Error creating art. Please try again.', 'error'); this.showLoading(false); }
+        }
+
+        addToGallery(imageUrl, description, style) {
+          const gallery = document.getElementById('gallery'); const placeholder = gallery.querySelector('.gallery-placeholder'); if (placeholder) placeholder.remove(); const galleryItem = document.createElement('div'); galleryItem.className = 'gallery-item'; galleryItem.innerHTML = `<img src="${imageUrl}" alt="${description}" class="gallery-image"><div class="gallery-info"><p><strong>${description}</strong></p><p>Style: ${style}</p><p>Created: ${new Date().toLocaleDateString()}</p></div>`;
+          if (!document.querySelector('#gallery-styles')) { const styleEl = document.createElement('style'); styleEl.id = 'gallery-styles'; styleEl.textContent = `.gallery-item{background:#fff;border-radius:8px;padding:10px;box-shadow:0 2px 6px rgba(0,0,0,0.06)}.gallery-image{width:100%;height:120px;object-fit:cover;border-radius:6px;margin-bottom:8px}.gallery-info{font-size:0.9em;color:#666}`; document.head.appendChild(styleEl); }
+          gallery.appendChild(galleryItem);
+        }
+
+        showLoading(show) { const loading = document.getElementById('loading'); if (show) loading.classList.remove('hidden'); else loading.classList.add('hidden'); }
+
+        showMessage(message, type) { const toast = document.createElement('div'); toast.className = `message-toast ${type}`; toast.textContent = message; if (!document.querySelector('#toast-styles')) { const style = document.createElement('style'); style.id = 'toast-styles'; style.textContent = `.message-toast{position:fixed;top:20px;right:20px;padding:12px 18px;border-radius:8px;font-size:0.95em;z-index:1200}.message-toast.success{background:#27ae60;color:#fff}.message-toast.error{background:#e74c3c;color:#fff}.message-toast.warning{background:#f39c12;color:#fff}`; document.head.appendChild(style); } document.body.appendChild(toast); setTimeout(()=>toast.remove(),4000); }
+      }
+
+      document.addEventListener('DOMContentLoaded', () => { new DrawingApp(); });
+      </script>
+      </div>
+    </div>
+        <div id="stories-content" class="feature-container">
+           <!-- Embed the Memory Storytelling interface directly -->
+           <iframe id="storytelling-iframe" src="{{ request.url_for('storytelling-home') }}" title="Memory Storytelling" style="width:100%; height:80vh; border:2px solid var(--border-light); border-radius:var(--border-radius-lg); background:var(--card-bg); box-shadow:var(--shadow-lg);"></iframe>
+        </div>
+      </div>
+    </div>
+
+    <div class="activity-dashboard view-container">
+      <div class="page-header dashboard-controls">
+          <h1 data-key="dashboardTitle">Activity Dashboard</h1>
+          <div class="header-buttons">
+            <button class="report-btn" id="report-btn"><i class='bx bx-file'></i><span data-key="generateReport">Generate Report</span></button>
+            <button class="report-btn" id="back-to-home-btn"><i class='bx bx-home'></i><span data-key="backToHome">Back to Home</span></button>
+          </div>
+      </div>
+      <div class="dashboard-grid">
+        <div class="dashboard-main">
+          <div class="activities" id="activities-container">
+            <!-- Dynamic activity cards will be loaded here -->
+            <div class="loading-spinner" id="activities-loading">
+              <i class='bx bx-loader-alt bx-spin'></i>
+              <span>Loading activities...</span>
+            </div>
+          </div>
+          <div class="report-section" id="report-section">
+            <h2 data-key="reportTitle">AI Generated Report</h2>
+            <div class="report-content" id="report-content"></div>
+            <div class="report-actions">
+              <button class="download-btn" id="download-txt-btn" data-key="downloadTxt">Download as TXT</button>
+              <button class="download-btn" id="download-pdf-btn" data-key="downloadPdf">Download as PDF</button>
+            </div>
+          </div>
+        </div>
+        <aside class="dashboard-side">
+          <div class="vision-aid-section report-section show">
+            <h2 data-key="aivision">Patient Vision Aid</h2>
+            <div class="vision-aid-container">
+                <video id="vision-video" autoplay playsinline></video>
+                <div class="vision-aid-overlay">
+                  <button class="vision-aid-btn" id="vision-aid-btn"><i class='bx bx-camera'></i></button>
+                </div>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </main>
+
+  <!-- Report Modal -->
+  <div id="report-modal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 data-key="reportTitle">AI Generated Report</h2>
+        <button class="modal-close" id="modal-close">&times;</button>
+      </div>
+      <div class="report-content" id="modal-report-content"></div>
+      <div class="report-actions">
+        <button class="download-btn" id="modal-download-txt-btn" data-key="downloadTxt">Download as TXT</button>
+        <button class="download-btn" id="modal-download-pdf-btn" data-key="downloadPdf">Download as PDF</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Function to navigate to role selection page
+    function navigateToRoleSelection() {
+      console.log('Navigating to role selection page...');
+      window.location.href = '/role-selection';
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      let isEnglish = false;
+      let isDashboardView = false;
+      const translations = {
+        en: { langBtn: 'English', switchToDashboard: 'Switch to Dashboard', switchToInterface: 'Back to Interface', dashboardTitle: 'Activity Dashboard', generateReport: 'Generate Report', backToHome: 'Back to Home', caregivers: 'Personal Caregiver', games: 'Mind Games', breathing: 'Relaxation Breathing', aiart: 'AI Art Therapy', stories: 'Memory Storytelling', aivision: 'Patient Vision Aid', caregiversDetails: 'Last: 09/18/2025 10:00 PM | Duration: 30 min', gamesDetails: 'Last: 09/18/2025 03:00 PM | Duration: 15 min', breathingDetails: 'Last: 09/17/2025 08:00 AM | Duration: 10 min', aiartDetails: 'Last: 09/16/2025 02:00 PM | Duration: 20 min', storiesDetails: 'Last: 09/15/2025 11:00 AM | Duration: 25 min', aivisionDetails: 'Last: 09/14/2025 09:00 AM | Duration: 10 min', reportTitle: 'AI Generated Report', downloadTxt: 'Download as TXT', downloadPdf: 'Download as PDF', breathingInstructions: 'Click start and follow the circle. Breathe in as it expands, and out as it shrinks.', startBreathing: 'Start', stopBreathing: 'Stop', artPromptPlaceholder: 'Describe what you want to see...', generateArt: 'Generate', artDisplayPlaceholder: 'Your generated image will appear here.', storyPictureTitle: 'The Old Italian Woman', storyPictureArtist: 'by Edgar Degas (1857)', storyPicturePrompt: 'Tell me a story about this painting. What do you see? What story does it tell you? Let your imagination run wild!', shareStory: 'Share Your Story' },
+        ar: { langBtn: 'العربية', switchToDashboard: 'الانتقال للداشبورد', switchToInterface: 'العودة للواجهة', dashboardTitle: 'لوحة الأنشطة', generateReport: 'إنشاء تقرير', backToHome: 'العودة للرئيسية', caregivers: 'الراعي الشخصي', games: 'ألعاب ذهنية', breathing: 'تمارين استرخاء', aiart: 'علاج بالفن', stories: 'قصص الذاكرة', aivision: 'مساعدة الرؤية', caregiversDetails: 'آخر استخدام: 18/09/2025 10:00م | المدة: 30 دقيقة', gamesDetails: 'آخر استخدام: 18/09/2025 03:00م | المدة: 15 دقيقة', breathingDetails: 'آخر استخدام: 17/09/2025 08:00ص | المدة: 10 دقائق', aiartDetails: 'آخر استخدام: 16/09/2025 02:00م | المدة: 20 دقيقة', storiesDetails: 'آخر استخدام: 15/09/2025 11:00ص | المدة: 25 دقيقة', aivisionDetails: 'آخر استخدام: 14/09/2025 09:00ص | المدة: 10 دقائق', reportTitle: 'تقرير الأداء التلقائي', downloadTxt: 'تحميل كملف نصي', downloadPdf: 'تحميل كملف PDF', breathingInstructions: 'اضغط ابدأ واتبع الدائرة. استنشق عندما تتوسع وازفر عندما تتقلص.', startBreathing: 'ابدأ', stopBreathing: 'إيقاف', artPromptPlaceholder: 'صف ماذا تريد أن ترى...', generateArt: 'إنشاء', artDisplayPlaceholder: 'صورتك التي تم إنشاؤها ستظهر هنا.', storyPictureTitle: 'المرأة الإيطالية العجوز', storyPictureArtist: 'لإدغار ديغا (1857)', storyPicturePrompt: 'أخبرني قصة عن هذه اللوحة. ماذا ترى؟ ما القصة التي ترويها لك؟ أطلق العنان لخيالك!', shareStory: 'شارك قصتك' }
+      };
+
+      const body = document.body;
+      const sidebarToggle = document.getElementById('sidebar-toggle');
+      const sidebarButtons = document.querySelectorAll('.sidebar button');
+      const languageToggle = document.getElementById('language-toggle');
+      const patientInterface = document.querySelector('.patient-interface');
+      const activityDashboard = document.querySelector('.activity-dashboard');
+      const reportBtn = document.getElementById('report-btn');
+      const reportSection = document.getElementById('report-section');
+      const featureContainers = document.querySelectorAll('.feature-container');
+      const pageHeaderTitle = document.getElementById('page-header-title');
+      const backToHomeBtn = document.getElementById('back-to-home-btn');
+      const activitiesContainer = document.getElementById('activities-container');
+      const reportModal = document.getElementById('report-modal');
+      const modalClose = document.getElementById('modal-close');
+      const modalReportContent = document.getElementById('modal-report-content');
+  const breathingBtn = document.getElementById('breathing-btn');
+  // breathing UI may be embedded as an iframe (no in-page controls). Only query these
+  // elements when they exist to avoid null-reference errors that stop other scripts
+  // (which previously prevented the games click handler from attaching).
+  const breathingContainer = document.querySelector('.breathing-container');
+  const breathingCircle = document.getElementById('breathing-circle');
+  let breathingInterval;
+
+      const updateToggleIcon = () => {
+        const toggleIcon = sidebarToggle.querySelector('i');
+        const isCollapsed = body.classList.contains('sidebar-collapsed');
+        if (isEnglish) {
+          toggleIcon.className = isCollapsed ? 'bx bx-menu-alt-right' : 'bx bx-menu-alt-left';
+        } else {
+          toggleIcon.className = isCollapsed ? 'bx bx-menu-alt-left' : 'bx bx-menu-alt-right';
+        }
+      };
+
+      const updateUIText = () => {
+        const lang = isEnglish ? 'en' : 'ar';
+        document.documentElement.lang = lang; 
+        document.documentElement.dir = isEnglish ? 'ltr' : 'rtl';
+        document.querySelectorAll('[data-key]').forEach(el => {
+          const key = el.dataset.key;
+          let text = translations[lang][key] || el.textContent;
+          if (key === 'switchToDashboard') text = isDashboardView ? translations[lang].switchToInterface : translations[lang].switchToDashboard;
+          el.textContent = text;
+        });
+        const activeSidebarButton = document.querySelector('.sidebar button.active');
+        if (activeSidebarButton && activeSidebarButton.id !== 'switch-btn') {
+            const activeSidebarButtonKey = activeSidebarButton.id;
+            pageHeaderTitle.textContent = translations[lang][activeSidebarButtonKey];
+        }
+        updateToggleIcon();
+      };
+      
+      const toggleSidebar = () => {
+        body.classList.toggle('sidebar-collapsed');
+        updateToggleIcon();
+      };
+
+      const handleSidebarSelection = (e) => {
+        const targetId = e.currentTarget.dataset.target;
+        const activityId = e.currentTarget.id;
+        
+        // End current activity session if switching activities
+        if (currentActivitySession && currentActivitySession !== activityId) {
+          endActivitySession();
+        }
+        
+        sidebarButtons.forEach(btn => btn.classList.remove('active'));
+        e.currentTarget.classList.add('active');
+
+        featureContainers.forEach(container => {
+            container.classList.remove('active');
+            if (container.id === targetId) {
+                container.classList.add('active');
+            }
+        });
+        
+        // Start new activity session
+        if (activityId && activityId !== 'switch-btn') {
+          startActivitySession(activityId);
+        }
+        
+        updateUIText();
+      };
+      
+      const handleLanguageSwitch = () => {
+        isEnglish = !isEnglish;
+        updateUIText();
+      };
+
+      const toggleBreathing = () => {
+        const isBreathing = breathingContainer.classList.toggle('breathing');
+        const lang = isEnglish ? 'en' : 'ar';
+        breathingBtn.textContent = isBreathing ? translations[lang].stopBreathing : translations[lang].startBreathing;
+
+        if (isBreathing) {
+          breathingCircle.textContent = isEnglish ? 'In' : 'شهيق';
+          setTimeout(() => { 
+            breathingCircle.textContent = isEnglish ? 'Out' : 'زفير';
+          }, 4000);
+          breathingInterval = setInterval(() => {
+            breathingContainer.classList.toggle('breathing');
+            setTimeout(() => breathingContainer.classList.toggle('breathing'), 4000);
+            breathingCircle.textContent = isEnglish ? 'In' : 'شهيق';
+            setTimeout(() => { 
+              breathingCircle.textContent = isEnglish ? 'Out' : 'زفير';
+            }, 4000);
+          }, 8000);
+        } else {
+          clearInterval(breathingInterval);
+          breathingCircle.textContent = isEnglish ? 'Breathe' : 'تنفس';
+        }
+      };
+
+      // Dashboard functionality
+      const loadActivities = async () => {
+        try {
+          console.log('Loading activities...');
+          const patientId = new URLSearchParams(window.location.search).get('patientId') || '1';
+          const response = await fetch(`/api/v1/patients/${patientId}/activities`);
+          const data = await response.json();
+          
+          if (data.status === 'success') {
+            console.log('Activities loaded successfully:', data.activities);
+            renderActivities(data.activities);
+          } else {
+            console.error('Failed to load activities:', data);
+            // Fallback to static activities if API fails
+            renderFallbackActivities();
+          }
+        } catch (error) {
+          console.error('Error loading activities:', error);
+          // Fallback to static activities if API fails
+          renderFallbackActivities();
+        }
+      };
+
+      const renderFallbackActivities = () => {
+        const fallbackActivities = [
+          {
+            id: 'caregiver',
+            name: 'Personal Caregiver',
+            icon: 'bx-bot',
+            last_used: new Date().toISOString(),
+            duration: 30,
+            total_sessions: 15
+          },
+          {
+            id: 'games',
+            name: 'Mind Games',
+            icon: 'bx-joystick',
+            last_used: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
+            duration: 15,
+            total_sessions: 8
+          },
+          {
+            id: 'breathing',
+            name: 'Relaxation Breathing',
+            icon: 'bx-spa',
+            last_used: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
+            duration: 10,
+            total_sessions: 12
+          },
+          {
+            id: 'aiart',
+            name: 'AI Art Therapy',
+            icon: 'bx-paint',
+            last_used: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+            duration: 20,
+            total_sessions: 6
+          },
+          {
+            id: 'stories',
+            name: 'Memory Storytelling',
+            icon: 'bx-book-open',
+            last_used: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
+            duration: 25,
+            total_sessions: 9
+          }
+        ];
+        renderActivities(fallbackActivities);
+      };
+
+      const renderActivities = (activities) => {
+        console.log('Rendering activities:', activities);
+        const activitiesHTML = activities.map(activity => {
+          const lastUsed = new Date(activity.last_used);
+          const daysAgo = Math.floor((new Date() - lastUsed) / (1000 * 60 * 60 * 24));
+          const lastUsedText = daysAgo === 0 ? 'Today' : daysAgo === 1 ? 'Yesterday' : `${daysAgo} days ago`;
+          
+          // Add performance score if available
+          const scoreText = activity.avg_score ? ` | Score: ${activity.avg_score}/100` : '';
+          
+          return `
+            <div class="card clickable" data-activity-id="${activity.id}" data-activity-name="${activity.name}">
+              <i class='bx ${activity.icon}'></i>
+              <h3>${activity.name}</h3>
+              <p>Last: ${lastUsedText} | Duration: ${activity.duration} min | Sessions: ${activity.total_sessions}${scoreText}</p>
+              <div class="activity-results" id="results-${activity.id}" style="margin-top: 10px; font-size: 12px; color: var(--text-secondary);">
+                <!-- Results will be loaded here -->
+              </div>
+            </div>
+          `;
+        }).join('');
+        
+        console.log('Activities HTML:', activitiesHTML);
+        activitiesContainer.innerHTML = activitiesHTML;
+        
+        // Add click handlers to activity cards
+        const clickableCards = document.querySelectorAll('.card.clickable');
+        console.log('Found clickable cards:', clickableCards.length);
+        clickableCards.forEach(card => {
+          card.addEventListener('click', handleActivityClick);
+        });
+        
+        // Load results for each activity
+        activities.forEach(activity => {
+          loadActivityResults(activity.id);
+        });
+        
+        // Show success message
+        console.log('✅ Dashboard activities loaded and made interactive!');
+      };
+
+      const loadActivityResults = async (activityId) => {
+        try {
+          const results = await getActivityResults(activityId);
+          const resultsContainer = document.getElementById(`results-${activityId}`);
+          
+          if (results && results.length > 0) {
+            const recentResults = results.slice(0, 3); // Show last 3 results
+            const resultsHTML = recentResults.map(result => {
+              const date = new Date(result.session_date).toLocaleDateString();
+              return `<div>${date}: Score ${result.score}/100 (${result.duration}min)</div>`;
+            }).join('');
+            
+            resultsContainer.innerHTML = `<div style="font-weight: bold; margin-bottom: 5px;">Recent Results:</div>${resultsHTML}`;
+          } else {
+            resultsContainer.innerHTML = '<div style="color: #999;">No results yet</div>';
+          }
+        } catch (error) {
+          console.error(`Error loading results for ${activityId}:`, error);
+        }
+      };
+
+      const handleActivityClick = (e) => {
+        console.log('Activity card clicked!');
+        const card = e.currentTarget;
+        const activityId = card.dataset.activityId;
+        const activityName = card.dataset.activityName;
+        
+        console.log('Activity ID:', activityId, 'Activity Name:', activityName);
+        
+        // Log the activity usage
+        logActivityUsage(activityId);
+        
+        // Navigate to the appropriate activity
+        switch(activityId) {
+          case 'caregiver':
+            // Switch back to interface and activate caregiver
+            patientInterface.style.display = 'block';
+            activityDashboard.style.display = 'none';
+            body.classList.remove('dashboard-view-active');
+            
+            // Activate caregiver tab
+            document.querySelector('#caregivers').click();
+            break;
+          case 'games':
+            // Switch back to interface and activate games
+            patientInterface.style.display = 'block';
+            activityDashboard.style.display = 'none';
+            body.classList.remove('dashboard-view-active');
+            
+            // Activate games tab
+            document.querySelector('#games').click();
+            break;
+          case 'breathing':
+            // Switch back to interface and activate breathing
+            patientInterface.style.display = 'block';
+            activityDashboard.style.display = 'none';
+            body.classList.remove('dashboard-view-active');
+            
+            // Activate breathing tab
+            document.querySelector('#breathing').click();
+            break;
+          case 'aiart':
+            // Switch back to interface and activate AI art
+            patientInterface.style.display = 'block';
+            activityDashboard.style.display = 'none';
+            body.classList.remove('dashboard-view-active');
+            
+            // Activate AI art tab
+            document.querySelector('#aiart').click();
+            break;
+          case 'stories':
+            // Switch back to interface and activate stories
+            patientInterface.style.display = 'block';
+            activityDashboard.style.display = 'none';
+            body.classList.remove('dashboard-view-active');
+            
+            // Activate stories tab
+            document.querySelector('#stories').click();
+            break;
+        }
+      };
+
+      const logActivityUsage = async (activityId) => {
+        try {
+          const patientId = new URLSearchParams(window.location.search).get('patientId') || '1';
+          await fetch(`/api/v1/patients/${patientId}/activities`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              activity_id: activityId,
+              duration: 1,
+              score: 75,
+              results: { type: 'usage_log', action: 'opened' },
+              notes: 'Quick usage log from dashboard card click'
+            })
+          });
+        } catch (error) {
+          console.error('Error logging activity usage:', error);
+        }
+      };
+      // Function to submit activity results from patient interface
+      const submitActivityResults = async (activityId, results) => {
+        try {
+          console.log(`Submitting results for ${activityId}:`, results);
+          const patientId = new URLSearchParams(window.location.search).get('patientId') || '1';
+          const response = await fetch(`/api/v1/patients/${patientId}/activities`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              activity_id: activityId,
+              duration: results.duration || 0,
+              results: results.data || {},
+              score: results.score || 0,
+              notes: results.notes || ''
+            })
+          });
+          const data = await response.json();
+          
+          if (data.status === 'success') {
+            console.log('Activity results submitted successfully:', data);
+            // Call feature usage end API
+            try {
+              const response = await fetch('/api/v1/feature-usage/end', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  usageId: window.__currentFeatureUsageId,
+                  metadata: {
+                    duration: results.duration,
+                    score: results.score,
+                    interactions: activityInteractionCount,
+                    results: results
+                  }
+                })
+              });
+              const result = await response.json();
+              if (result.status === 'success') {
+                console.log(`✅ Activity session ended successfully - Dashboard will be updated in real-time`);
+              }
+            } catch (e) { console.warn('feature usage end failed', e); }
+            loadActivities();
+          } else {
+            console.error('Failed to submit activity results:', data);
+          }
+        } catch (error) {
+          console.error('Error submitting activity results:', error);
+        }
+      };
+
+      // Function to get activity results for display
+      const getActivityResults = async (activityId) => {
+        try {
+          const patientId = new URLSearchParams(window.location.search).get('patientId') || '1';
+          const response = await fetch(`/api/v1/patients/${patientId}/activities/${activityId}/results`);
+          const data = await response.json();
+          
+          if (data.status === 'success') {
+            console.log(`Results for ${activityId}:`, data.results);
+            return data.results;
+          } else {
+            console.error('Failed to get activity results:', data);
+            return [];
+          }
+        } catch (error) {
+          console.error('Error getting activity results:', error);
+          return [];
+        }
+      };
+
+      const generateReport = async () => {
+        try {
+          const response = await fetch('/api/report', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            }
+          });
+          const data = await response.json();
+          
+          if (data.status === 'success') {
+            // Show report in modal
+            modalReportContent.textContent = data.report;
+            reportModal.style.display = 'block';
+          } else {
+            console.error('Failed to generate report:', data);
+            alert('Failed to generate report. Please try again.');
+          }
+        } catch (error) {
+          console.error('Error generating report:', error);
+          alert('Error generating report. Please try again.');
+        }
+      };
+
+      const downloadReport = (format) => {
+        const reportContent = modalReportContent.textContent;
+        const timestamp = new Date().toISOString().split('T')[0];
+        
+        if (format === 'txt') {
+          const blob = new Blob([reportContent], { type: 'text/plain' });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `activity-report-${timestamp}.txt`;
+          a.click();
+          URL.revokeObjectURL(url);
+        } else if (format === 'pdf') {
+          // Use jsPDF if available
+          if (typeof window.jspdf !== 'undefined') {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            const lines = doc.splitTextToSize(reportContent, 180);
+            doc.text(lines, 10, 10);
+            doc.save(`activity-report-${timestamp}.pdf`);
+          } else {
+            alert('PDF generation not available. Please download as TXT instead.');
+          }
+        }
+      };
+
+      const closeModal = () => {
+        reportModal.style.display = 'none';
+      };
+
+      // Event listeners
+      sidebarToggle.addEventListener('click', toggleSidebar);
+      languageToggle.addEventListener('click', handleLanguageSwitch);
+      sidebarButtons.forEach(button => button.addEventListener('click', handleSidebarSelection));
+      reportBtn.addEventListener('click', generateReport);
+      backToHomeBtn.addEventListener('click', () => {
+        patientInterface.style.display = 'block';
+        activityDashboard.style.display = 'none';
+        body.classList.remove('dashboard-view-active');
+        updateUIText();
+      });
+      
+      // Modal event listeners
+      modalClose.addEventListener('click', closeModal);
+      document.getElementById('modal-download-txt-btn').addEventListener('click', () => downloadReport('txt'));
+      document.getElementById('modal-download-pdf-btn').addEventListener('click', () => downloadReport('pdf'));
+      
+      // Close modal when clicking outside
+      reportModal.addEventListener('click', (e) => {
+        if (e.target === reportModal) {
+          closeModal();
+        }
+      });
+
+      // ===============================================================================
+      // ENHANCED ACTIVITY TRACKING SYSTEM
+      // ===============================================================================
+      
+      // Activity session tracking
+      let currentActivitySession = null;
+      let activityStartTime = null;
+      let activityInteractionCount = 0;
+      
+      // Start tracking an activity session
+      const startActivitySession = async (activityId) => {
+        console.log(`Starting activity session: ${activityId}`);
+        currentActivitySession = activityId;
+        activityStartTime = new Date();
+        activityInteractionCount = 0;
+        
+        // Call feature usage start API
+        try {
+          const patientId = new URLSearchParams(window.location.search).get('patientId') || '1';
+          const response = await fetch('/api/v1/feature-usage/start', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              patientId: patientId,
+              activityType: activityId
+            })
+          });
+          const result = await response.json();
+          if (result.status === 'success') {
+            window.__currentFeatureUsageId = result.usage_id;
+            console.log(`✅ Activity session started with ID: ${result.usage_id} - Real-time updates will be sent to dashboard`);
+          }
+        } catch (e) { console.warn('feature usage start failed', e); }
+      };
+      
+      // End tracking an activity session and submit results
+      const endActivitySession = async (results = {}) => {
+        if (!currentActivitySession || !activityStartTime) return;
+        
+        const duration = Math.round((new Date() - activityStartTime) / 60000); // minutes
+        const activityId = currentActivitySession;
+        
+        console.log(`Ending activity session: ${activityId}, Duration: ${duration} minutes`);
+        
+        // Calculate basic engagement score
+        const engagementScore = Math.min(100, Math.max(0, 
+          (duration * 10) + (activityInteractionCount * 5) + (results.score || 50)
+        ));
+        
+        const sessionResults = {
+          duration: duration,
+          data: {
+            interactions: activityInteractionCount,
+            session_start: activityStartTime.toISOString(),
+            session_end: new Date().toISOString(),
+            ...results.data
+          },
+          score: results.score || engagementScore,
+          notes: results.notes || `Session completed with ${activityInteractionCount} interactions`
+        };
+        
+        await submitActivityResults(activityId, sessionResults);
+        
+        // Track feature usage end
+        try {
+          if (window.__currentFeatureUsageId) {
+            await fetch(`/api/v1/feature-usage/end`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ usage_id: window.__currentFeatureUsageId, metadata: { interactions: activityInteractionCount } })
+            });
+          }
+        } catch (e) { console.warn('feature usage end failed', e); }
+
+        // Reset session tracking
+        currentActivitySession = null;
+        activityStartTime = null;
+        activityInteractionCount = 0;
+        window.__currentFeatureUsageId = null;
+      };
+      
+      // Track interaction within current activity
+      const trackActivityInteraction = (interactionType = 'general') => {
+        if (currentActivitySession) {
+          activityInteractionCount++;
+          console.log(`Activity interaction: ${interactionType} (Total: ${activityInteractionCount})`);
+        }
+      };
+      
+      // Enhanced activity result submission functions
+      
+      // Caregiver chat results with automatic tracking
+      window.submitCaregiverResults = async (chatData) => {
+        const results = {
+          duration: chatData.duration || 0,
+          data: {
+            messages_count: chatData.messages_count || 0,
+            topics_discussed: chatData.topics || [],
+            sentiment: chatData.sentiment || 'neutral',
+            engagement_level: chatData.engagement || 'medium',
+            conversation_quality: chatData.conversation_quality || 'good'
+          },
+          score: chatData.score || 75,
+          notes: chatData.notes || 'Caregiver chat session completed'
+        };
+        await submitActivityResults('caregiver', results);
+      };
+
+      // Example: Submit games results
+      window.submitGamesResults = async (gameData) => {
+        const results = {
+          duration: gameData.duration || 0,
+          data: {
+            game_type: gameData.game_type || 'unknown',
+            level_reached: gameData.level || 0,
+            score_achieved: gameData.score || 0,
+            accuracy: gameData.accuracy || 0,
+            time_taken: gameData.time_taken || 0
+          },
+          score: gameData.score || 0,
+          notes: gameData.notes || ''
+        };
+        await submitActivityResults('games', results);
+      };
+
+      // Example: Submit breathing exercise results
+      window.submitBreathingResults = async (breathingData) => {
+        const results = {
+          duration: breathingData.duration || 0,
+          data: {
+            exercise_type: breathingData.exercise_type || 'basic',
+            cycles_completed: breathingData.cycles || 0,
+            heart_rate_before: breathingData.heart_rate_before || 0,
+            heart_rate_after: breathingData.heart_rate_after || 0,
+            relaxation_level: breathingData.relaxation_level || 0
+          },
+          score: breathingData.score || 0,
+          notes: breathingData.notes || ''
+        };
+        await submitActivityResults('breathing', results);
+      };
+
+      // Example: Submit AI art therapy results
+      window.submitArtResults = async (artData) => {
+        const results = {
+          duration: artData.duration || 0,
+          data: {
+            art_type: artData.art_type || 'drawing',
+            creativity_score: artData.creativity_score || 0,
+            colors_used: artData.colors_used || 0,
+            complexity_level: artData.complexity || 'medium',
+            emotional_expression: artData.emotional_expression || 'neutral'
+          },
+          score: artData.score || 0,
+          notes: artData.notes || ''
+        };
+        await submitActivityResults('aiart', results);
+      };
+
+      // Example: Submit storytelling results
+      window.submitStoryResults = async (storyData) => {
+        const results = {
+          duration: storyData.duration || 0,
+          data: {
+            story_length: storyData.story_length || 0,
+            memory_recall: storyData.memory_recall || 0,
+            creativity_score: storyData.creativity_score || 0,
+            emotional_engagement: storyData.emotional_engagement || 0,
+            language_fluency: storyData.language_fluency || 0
+          },
+          score: storyData.score || 0,
+          notes: storyData.notes || ''
+        };
+        await submitActivityResults('stories', results);
+      };
+
+      // Make functions globally available
+      window.submitActivityResults = submitActivityResults;
+      window.getActivityResults = getActivityResults;
+  // Attach breathing toggle only if the button exists (the relaxation page is now
+  // embedded via iframe so the in-page control may be absent).
+  breathingBtn?.addEventListener('click', toggleBreathing);
+
+      // Games iframe navigation with tracking
+      const gamesGrid = document.getElementById('games-grid');
+      const gamesIframe = document.getElementById('games-iframe');
+      gamesGrid.addEventListener('click', (e) => {
+        const card = e.target.closest('.game-card');
+        if (!card) return;
+        const url = card.getAttribute('data-url');
+        if (url) {
+          gamesIframe.src = url;
+          trackActivityInteraction('game_selection');
+          
+          // Submit game selection data
+          window.submitGamesResults({
+            duration: 1, // Minimum duration for game selection
+            data: {
+              game_type: card.querySelector('h3').textContent,
+              action: 'game_selected',
+              game_url: url
+            },
+            score: 80,
+            notes: `Selected game: ${card.querySelector('h3').textContent}`
+          });
+        }
+      });
+
+      // Story recording toggle
+      document.getElementById('record-story-btn')?.addEventListener('click', (e) => {
+        e.currentTarget.classList.toggle('recording');
+      });
+
+      // Story picture character count
+      const storyTextarea = document.querySelector('.story-picture-textarea');
+      const charCount = document.querySelector('.story-picture-char-count');
+      storyTextarea?.addEventListener('input', () => {
+          const count = storyTextarea.value.length;
+          charCount.textContent = `${count}/1000`;
+      });
+
+      // Vision Aid camera access - camera disabled temporarily
+      const visionVideo = document.getElementById('vision-video');
+      // Camera auto-start disabled - uncomment below to re-enable
+      /*
+      if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
+          .then(stream => {
+            visionVideo.srcObject = stream;
+          })
+          .catch(err => {
+            console.error("Error accessing camera: ", err);
+            document.getElementById('aivision-content').innerHTML = '<p style="color: var(--text-secondary); text-align: center;">Could not access the camera. Please ensure permissions are granted.</p>';
+          });
+      }
+      */
+
+      updateUIText();
+      
+      // Initialize dashboard if it's already visible
+      if (activityDashboard.style.display === 'block' || activityDashboard.style.display === '') {
+        loadActivities();
+      }
+      
+      // ===============================================================================
+      // AUTOMATIC SESSION MANAGEMENT
+      // ===============================================================================
+      
+      // End session when user leaves the page
+      window.addEventListener('beforeunload', () => {
+        if (currentActivitySession) {
+          endActivitySession();
+        }
+      });
+      // End session when switching to dashboard view
+      const originalHandleViewSwitch = handleViewSwitch;
+      handleViewSwitch = () => {
+        if (currentActivitySession) {
+          endActivitySession();
+        }
+        originalHandleViewSwitch();
+      };
+      
+      // Track iframe interactions for embedded activities
+      const trackIframeActivity = (iframeId, activityType) => {
+        const iframe = document.getElementById(iframeId);
+        if (iframe) {
+          iframe.addEventListener('load', () => {
+            trackActivityInteraction(`${activityType}_loaded`);
+          });
+        }
+      };
+      
+      // Set up iframe tracking
+      trackIframeActivity('caregiver-chat-iframe', 'caregiver');
+      trackIframeActivity('games-iframe', 'games');
+      trackIframeActivity('relaxation-iframe', 'breathing');
+      trackIframeActivity('storytelling-iframe', 'stories');
+      
+      // Periodic activity heartbeat (every 30 seconds)
+      setInterval(() => {
+        if (currentActivitySession) {
+          trackActivityInteraction('heartbeat');
+        }
+      }, 30000);
+      
+      console.log('✅ Enhanced patient interface with activity tracking initialized!');
+
+      // Back to Role Select button functionality is handled by onclick attribute
+    });
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simon Memory Game</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+        }
+
+        .game-container {
+            text-align: center;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+        }
+
+        h1 {
+            margin-bottom: 20px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .game-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 30px;
+            gap: 20px;
+        }
+
+        .info-item {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 15px 25px;
+            border-radius: 15px;
+            backdrop-filter: blur(5px);
+        }
+
+        .info-label {
+            font-size: 14px;
+            opacity: 0.8;
+            margin-bottom: 5px;
+        }
+
+        .info-value {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .simon-board {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            width: 300px;
+            height: 300px;
+            margin: 30px auto;
+            border-radius: 50%;
+            background: #333;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .simon-button {
+            border-radius: 20px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+            overflow: hidden;
+            font-size: 18px;
+            font-weight: bold;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+        }
+
+        .simon-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .simon-button:active {
+            transform: scale(0.95);
+        }
+
+        .red {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+        }
+
+        .blue {
+            background: linear-gradient(135deg, #4ecdc4, #44a08d);
+        }
+
+        .yellow {
+            background: linear-gradient(135deg, #feca57, #ff9ff3);
+        }
+
+        .green {
+            background: linear-gradient(135deg, #48dbfb, #0abde3);
+        }
+
+        .simon-button.active {
+            filter: brightness(1.5);
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.8);
+            transform: scale(1.1);
+        }
+
+        .controls {
+            margin-top: 30px;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            margin: 0 10px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 7px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .message {
+            margin-top: 20px;
+            font-size: 18px;
+            font-weight: bold;
+            min-height: 25px;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+        }
+
+        .success {
+            color: #2ecc71;
+        }
+
+        .error {
+            color: #e74c3c;
+        }
+
+        .info {
+            color: #f39c12;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .pulse {
+            animation: pulse 0.5s ease-in-out;
+        }
+
+        #backBtn {
+            background: linear-gradient(135deg, #444, #222);
+        }
+
+        #backBtn:hover {
+            background: linear-gradient(135deg, #666, #333);
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <h1>Simon Memory Game</h1>
+        
+        <div class="game-info">
+            <div class="info-item">
+                <div class="info-label">Score</div>
+                <div class="info-value" id="score">0</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">Level</div>
+                <div class="info-value" id="level">1</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">Best</div>
+                <div class="info-value" id="bestScore">0</div>
+            </div>
+        </div>
+
+        <div class="simon-board">
+            <button class="simon-button red" data-color="red"></button>
+            <button class="simon-button blue" data-color="blue"></button>
+            <button class="simon-button yellow" data-color="yellow"></button>
+            <button class="simon-button green" data-color="green"></button>
+        </div>
+
+        <div class="controls">
+            <button class="btn" id="startBtn">Start Game</button>
+            <button class="btn" id="resetBtn">Reset</button>
+            <button class="btn" id="backBtn">Return to Main</button>
+        </div>
+
+        <div class="message" id="message">Press Start to begin!</div>
+    </div>
+
+    <script>
+        class SimonGame {
+            constructor() {
+                this.sequence = [];
+                this.playerSequence = [];
+                this.level = 1;
+                this.score = 0;
+                this.bestScore = parseInt(localStorage.getItem('simonBestScore')) || 0;
+                this.isPlaying = false;
+                this.isShowingSequence = false;
+                this.colors = ['red', 'blue', 'yellow', 'green'];
+                this.sounds = {};
+                this.audioContext = null;
+                
+                this.initElements();
+                this.updateDisplay();
+                this.bindEvents();
+            }
+
+            initElements() {
+                this.startBtn = document.getElementById('startBtn');
+                this.resetBtn = document.getElementById('resetBtn');
+                this.scoreEl = document.getElementById('score');
+                this.levelEl = document.getElementById('level');
+                this.bestScoreEl = document.getElementById('bestScore');
+                this.messageEl = document.getElementById('message');
+                this.buttons = document.querySelectorAll('.simon-button');
+                this.backBtn = document.getElementById('backBtn');
+            }
+
+            initSounds() {
+                if (!this.audioContext) {
+                    this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    // Resume AudioContext if suspended (modern browsers require user interaction)
+                    if (this.audioContext.state === 'suspended') {
+                        this.audioContext.resume().then(() => {
+                            console.log('AudioContext resumed');
+                        }).catch(err => {
+                            console.error('Failed to resume AudioContext:', err);
+                        });
+                    }
+                }
+                const frequencies = {
+                    red: 220, blue: 277, yellow: 330, green: 415
+                };
+                this.colors.forEach(color => {
+                    this.sounds[color] = frequencies[color];
+                });
+            }
+
+            playSound(color) {
+                if (!this.audioContext || this.audioContext.state === 'suspended') {
+                    console.warn('AudioContext is not available or suspended');
+                    return;
+                }
+                const oscillator = this.audioContext.createOscillator();
+                const gainNode = this.audioContext.createGain();
+                oscillator.connect(gainNode);
+                gainNode.connect(this.audioContext.destination);
+                oscillator.frequency.value = this.sounds[color];
+                oscillator.type = 'sine';
+                gainNode.gain.setValueAtTime(0.3, this.audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + 0.3);
+                oscillator.start(this.audioContext.currentTime);
+                oscillator.stop(this.audioContext.currentTime + 0.3);
+            }
+
+            bindEvents() {
+                this.backBtn.addEventListener('click', () => window.location.href = "/");
+                this.startBtn.addEventListener('click', () => {
+                    this.initSounds(); // Initialize/resume AudioContext on user interaction
+                    this.startGame();
+                });
+                this.resetBtn.addEventListener('click', () => this.resetGame());
+                this.buttons.forEach(button => {
+                    button.addEventListener('click', (e) => {
+                        if (this.isPlaying && !this.isShowingSequence) {
+                            this.handlePlayerInput(e.target.dataset.color);
+                        }
+                    });
+                });
+            }
+
+            startGame() {
+                this.isPlaying = true;
+                this.sequence = [];
+                this.playerSequence = [];
+                this.level = 1;
+                this.score = 0;
+                this.updateDisplay();
+                this.showMessage('Watch the sequence!', 'info');
+                this.startBtn.textContent = 'Playing...';
+                this.startBtn.disabled = true;
+                this.nextLevel();
+            }
+
+            resetGame() {
+                this.isPlaying = false;
+                this.isShowingSequence = false;
+                this.sequence = [];
+                this.playerSequence = [];
+                this.level = 1;
+                this.score = 0;
+                this.updateDisplay();
+                this.showMessage('Press Start to begin!');
+                this.startBtn.textContent = 'Start Game';
+                this.startBtn.disabled = false;
+                this.buttons.forEach(btn => btn.classList.remove('active'));
+            }
+
+            nextLevel() {
+                this.playerSequence = [];
+                this.addToSequence();
+                this.showSequence();
+            }
+
+            addToSequence() {
+                const randomColor = this.colors[Math.floor(Math.random() * this.colors.length)];
+                this.sequence.push(randomColor);
+            }
+
+            async showSequence() {
+                this.isShowingSequence = true;
+                this.showMessage(`Level ${this.level} - Watch carefully!`, 'info');
+                await this.delay(1000);
+                for (let i = 0; i < this.sequence.length; i++) {
+                    await this.delay(200);
+                    this.activateButton(this.sequence[i]);
+                    await this.delay(600);
+                    this.deactivateButton(this.sequence[i]);
+                }
+                this.isShowingSequence = false;
+                this.showMessage('Now repeat the sequence!', 'success');
+            }
+
+            activateButton(color) {
+                const button = document.querySelector(`[data-color="${color}"]`);
+                button.classList.add('active');
+                this.playSound(color);
+            }
+
+            deactivateButton(color) {
+                const button = document.querySelector(`[data-color="${color}"]`);
+                button.classList.remove('active');
+            }
+
+            handlePlayerInput(color) {
+                this.activateButton(color);
+                setTimeout(() => this.deactivateButton(color), 200);
+                this.playerSequence.push(color);
+                const currentIndex = this.playerSequence.length - 1;
+                if (this.playerSequence[currentIndex] !== this.sequence[currentIndex]) {
+                    this.gameOver();
+                    return;
+                }
+                if (this.playerSequence.length === this.sequence.length) {
+                    this.score += this.level * 10;
+                    this.updateDisplay();
+                    if (this.level >= 20) {
+                        this.winGame();
+                    } else {
+                        this.level++;
+                        this.showMessage('Correct! Get ready for next level...', 'success');
+                        setTimeout(() => this.nextLevel(), 1500);
+                    }
+                }
+            }
+
+            gameOver() {
+                this.isPlaying = false;
+                this.showMessage('Game Over! Try again.', 'error');
+                this.startBtn.textContent = 'Start Game';
+                this.startBtn.disabled = false;
+                if (this.score > this.bestScore) {
+                    this.bestScore = this.score;
+                    localStorage.setItem('simonBestScore', this.bestScore.toString());
+                    this.updateDisplay();
+                    this.showMessage('New Best Score! Game Over.', 'success');
+                }
+                this.buttons.forEach(btn => {
+                    btn.style.background = '#e74c3c';
+                    setTimeout(() => { btn.style.background = ''; }, 300);
+                });
+            }
+
+            winGame() {
+                this.isPlaying = false;
+                this.showMessage('Congratulations! You completed all 20 levels!', 'success');
+                this.startBtn.textContent = 'Start Game';
+                this.startBtn.disabled = false;
+                if (this.score > this.bestScore) {
+                    this.bestScore = this.score;
+                    localStorage.setItem('simonBestScore', this.bestScore.toString());
+                    this.updateDisplay();
+                }
+                this.buttons.forEach((btn, index) => {
+                    setTimeout(() => {
+                        btn.classList.add('pulse');
+                        setTimeout(() => btn.classList.remove('pulse'), 500);
+                    }, index * 200);
+                });
+            }
+
+            showMessage(text, type = '') {
+                this.messageEl.textContent = text;
+                this.messageEl.className = `message ${type}`;
+            }
+
+            updateDisplay() {
+                this.scoreEl.textContent = this.score;
+                this.levelEl.textContent = this.level;
+                this.bestScoreEl.textContent = this.bestScore;
+            }
+
+            delay(ms) {
+                return new Promise(resolve => setTimeout(resolve, ms));
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            new SimonGame();
+        });
+    </script>
+</body>
+</html>
