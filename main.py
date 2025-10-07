@@ -13,8 +13,9 @@ from fastapi.templating import Jinja2Templates
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse, FileResponse, JSONResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, validator, ValidationError
 from fastapi import APIRouter
+from fastapi.exceptions import RequestValidationError
 
 
 # Load environment variables from .env if present
@@ -37,6 +38,34 @@ app = FastAPI(
     docs_url="/docs",
     redoc_url="/redoc"
 )
+
+# --- CUSTOM EXCEPTION HANDLERS ---
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request: Request, exc: RequestValidationError):
+    """Custom handler for request validation errors (422 errors)"""
+    error_details = []
+    for error in exc.errors():
+        if error.get("type") == "json_invalid":
+            error_details.append({
+                "field": "request_body",
+                "message": "Invalid JSON format. Please check your request body syntax.",
+                "type": "json_invalid"
+            })
+        else:
+            error_details.append({
+                "field": ".".join(str(loc) for loc in error.get("loc", [])),
+                "message": error.get("msg", "Validation error"),
+                "type": error.get("type", "validation_error")
+            })
+    
+    return JSONResponse(
+        status_code=422,
+        content={
+            "detail": "Request validation failed",
+            "errors": error_details,
+            "message": "Please check your request format and try again."
+        }
+    )
 
 # --- USER AUTHENTICATION SETUP ---
 from sqlalchemy import Column, Integer, String, create_engine
