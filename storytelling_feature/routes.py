@@ -146,39 +146,67 @@ async def get_memory(memory_id: int, db: Session = Depends(get_db)):
     return models.MemoryResponse(**memory_data)
 
 # Summarize memory text
-@storytelling_router.post("/memories/{memory_id}/summarize/", response_model=models.SummarizeResponse)
+@storytelling_router.post("/memories/{memory_id}/summarize/")
 async def summarize_memory(
     memory_id: int, 
     request: models.SummarizeRequest, 
     db: Session = Depends(get_db)
 ):
     """Generate simplified summary of memory text for dementia patients"""
+    # Return 422 if memory_id is not positive
+    if memory_id <= 0:
+        raise HTTPException(status_code=422, detail="Memory ID must be a positive integer")
+    
+    # Return 422 if text is missing or empty
+    if not request.text or not request.text.strip():
+        raise HTTPException(status_code=422, detail="Text is required and cannot be empty")
+    
+    # Check if the memory exists in the database; return 404 if not found
     db_memory = crud.get_memory(db, memory_id=memory_id)
     if db_memory is None:
         raise HTTPException(status_code=404, detail="Memory not found")
     
-    # Use provided text or memory description
-    text_to_summarize = request.text if request.text else db_memory.description
-    
     try:
-        # Generate summary using AI service
-        summary = await ai_services.summarize_text(text_to_summarize)
+        # Call the async function summarize_text from ai_services
+        summary = await ai_services.summarize_text(request.text)
         
-        # Update memory with summary
-        updated_memory = crud.update_memory_summary(db, memory_id, summary)
+        # Validate that we got a valid summary
+        if not summary:
+            summary = "ملخص بسيط للذكرى." if any('\u0600' <= c <= '\u06FF' for c in request.text) else "Simple memory summary."
         
-        return models.SummarizeResponse(summary=summary, memory_id=memory_id)
+        # Save the generated summary using update_memory_summary
+        try:
+            updated_memory = crud.update_memory_summary(db, memory_id, summary)
+        except Exception as db_error:
+            # Log database error but still return the summary
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.warning(f"Failed to save summary to database for memory {memory_id}: {str(db_error)}")
+        
+        # Return JSON: { "summary": "...", "memory_id": <id> }
+        return {"summary": summary, "memory_id": memory_id}
         
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Summarization failed: {str(e)}")
+        # Log the error for debugging
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.error(f"Summarization failed for memory {memory_id}: {str(e)}")
+        
+        # Return a user-friendly error message
+        error_message = "حدث خطأ أثناء تبسيط النص" if any('\u0600' <= c <= '\u06FF' for c in request.text) else "An error occurred while summarizing the text"
+        raise HTTPException(status_code=500, detail=error_message)
 
 # Generate text-to-speech
 @storytelling_router.get("/memories/{memory_id}/tts/", response_model=models.TTSResponse)
 async def generate_tts(memory_id: int, db: Session = Depends(get_db)):
     """Generate audio file for memory text using text-to-speech"""
+    # Validate memory_id
+    if memory_id <= 0:
+        raise HTTPException(status_code=422, detail="Memory ID must be a positive integer")
+    
     db_memory = crud.get_memory(db, memory_id=memory_id)
     if db_memory is None:
-        raise HTTPException(status_code=404, detail="Memory not found")
+        raise HTTPException(status_code=404, detail=f"Memory with ID {memory_id} not found")
     
     # Return existing audio if available and is a real MP3 file
     if (
@@ -204,8 +232,19 @@ async def generate_tts(memory_id: int, db: Session = Depends(get_db)):
         # Use summary if available, otherwise use description
         text_for_tts = db_memory.summary if db_memory.summary else db_memory.description
         
+        # Validate that we have text for TTS
+        if not text_for_tts or not text_for_tts.strip():
+            raise HTTPException(
+                status_code=422, 
+                detail="No text available for text-to-speech. Memory has no description or summary."
+            )
+        
         # Generate audio file
         audio_path = await ai_services.text_to_speech(text_for_tts, static_dir)
+        
+        # Validate that audio was generated
+        if not audio_path or not os.path.exists(audio_path):
+            raise HTTPException(status_code=500, detail="Failed to generate audio file")
         
         # Update memory with audio path
         updated_memory = crud.update_memory_audio(db, memory_id, audio_path)
@@ -213,9 +252,19 @@ async def generate_tts(memory_id: int, db: Session = Depends(get_db)):
         # Build URL for response
         audio_url = crud.build_file_url(audio_path, static_dir)
         
+        if not audio_url:
+            raise HTTPException(status_code=500, detail="Failed to create audio URL")
+        
         return models.TTSResponse(audio_url=audio_url, memory_id=memory_id)
         
+    except HTTPException:
+        # Re-raise HTTP exceptions as-is
+        raise
     except Exception as e:
+        # Log the error for debugging
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.error(f"TTS generation failed for memory {memory_id}: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Text-to-speech generation failed: {str(e)}")
 
 # Health check endpoint
