@@ -135,7 +135,31 @@ async function generateSummary(memoryId, button) {
     button.disabled = true;
     
     try {
-        const response = await fetch(`${API_BASE_URL}/storytelling/memories/${memoryId}/summarize/`, { method: 'POST' });
+        // First, get the memory details to extract the description text
+        const memoryResponse = await fetch(`${API_BASE_URL}/storytelling/memories/${memoryId}/`);
+        if (!memoryResponse.ok) throw new Error(`Failed to fetch memory: ${memoryResponse.status}`);
+        
+        const memory = await memoryResponse.json();
+        const textToSummarize = memory.description;
+        
+        if (!textToSummarize || !textToSummarize.trim()) {
+            showStatus('لا يوجد نص لتبسيطه في هذه الذكرى.', 'warning');
+            button.innerHTML = originalContent;
+            button.disabled = false;
+            return;
+        }
+        
+        // Now send the summarize request with the required text field
+        const response = await fetch(`${API_BASE_URL}/storytelling/memories/${memoryId}/summarize/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                text: textToSummarize
+            })
+        });
+        
         if (!response.ok) throw new Error(`Server error: ${response.status}`);
         
         await response.json();
