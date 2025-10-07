@@ -17,21 +17,31 @@ GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 # تهيئة Gemini
 if GEMINI_API_KEY:
     genai.configure(api_key=GEMINI_API_KEY)
-    # Try different model names in order of preference
-    try:
-        gemini_model = genai.GenerativeModel("gemini-1.5-pro")
-    except:
+    # Try different model names in order of preference (current available models)
+    model_names = [
+        "gemini-2.0-flash",
+        "gemini-2.5-flash", 
+        "gemini-2.5-pro",
+        "gemini-1.5-flash",
+        "gemini-pro",
+        "models/gemini-1.5-pro-latest",
+        "models/gemini-1.5-flash-latest"
+    ]
+    
+    gemini_model = None
+    for model_name in model_names:
         try:
-            gemini_model = genai.GenerativeModel("gemini-1.0-pro")
-        except:
-            try:
-                gemini_model = genai.GenerativeModel("gemini-pro")
-            except:
-                gemini_model = None
-                print("لم يتم العثور على نموذج Gemini متاح")
+            gemini_model = genai.GenerativeModel(model_name)
+            print(f"Successfully initialized Gemini model: {model_name}")
+            break
+        except Exception as e:
+            continue
+    
+    if gemini_model is None:
+        print("لم يتم العثور على نموذج Gemini متاح - سيتم استخدام النسخة المحلية")
 else:
     gemini_model = None
-    print("لم يتم العثور على GEMINI_API_KEY في ملف .env")
+    print("لم يتم العثور على GEMINI_API_KEY في ملف .env - سيتم استخدام النسخة المحلية")
 
 # Optional local TTS fallback (gTTS)
 try:
@@ -45,24 +55,82 @@ async def summarize_text(text: str) -> str:
     Summarize and simplify text for dementia patients
     Uses Gemini first, then local fallback
     """
-    # Try Gemini first
+    if not text:
+        return ""
+    
+    # Try Gemini first if available
     if gemini_model:
         try:
-            response = gemini_model.generate_content(
-                f"قم بتبسيط هذا النص ليكون مناسباً لمريض الخرف:\n\n{text}"
-            )
-            return response.text.strip()
+            # Use simpler prompt to avoid quota issues
+            prompt = f"اجعل هذا النص أبسط وأقصر:\n\n{text}" if any('\u0600' <= c <= '\u06FF' for c in text) else f"Make this text simpler and shorter:\n\n{text}"
+            
+            response = gemini_model.generate_content(prompt)
+            if response and response.text:
+                return response.text.strip()
         except Exception as e:
-            print(f"Gemini summarization failed: {e}")
+            error_msg = str(e)
+            if "429" in error_msg or "quota" in error_msg.lower():
+                print("Gemini API quota exceeded, using local fallback")
+            elif "403" in error_msg:
+                print("Gemini API access denied, check API key")
+            else:
+                print(f"Gemini summarization failed: {e}")
     
-    # Local fallback - simple text truncation
+    # Local fallback - improved text processing
     print("Using local fallback for text summarization")
-    sentences = text.split('.')
-    simple_text = '. '.join(sentences[:3]).strip()
-    if len(simple_text) > 200:
-        simple_text = simple_text[:200] + "..."
-    
-    return simple_text if simple_text else "ملخص بسيط للذكرى."
+    try:
+        # Clean and prepare text
+        clean_text = text.strip()
+        
+        # If text is already short enough, return as is
+        if len(clean_text) <= 200:
+            return clean_text
+        
+        # Try to split by sentences (Arabic and English)
+        sentence_endings = ['.', '。', '؟', '!', '؟', '！']
+        sentences = []
+        current_sentence = ""
+        
+        for char in clean_text:
+            current_sentence += char
+            if char in sentence_endings:
+                sentences.append(current_sentence.strip())
+                current_sentence = ""
+        
+        # Add remaining text as last sentence if any
+        if current_sentence.strip():
+            sentences.append(current_sentence.strip())
+        
+        # Select sentences that fit within 200 characters
+        selected_sentences = []
+        char_count = 0
+        
+        for sentence in sentences:
+            if sentence and char_count + len(sentence) <= 190:  # Leave some margin
+                selected_sentences.append(sentence)
+                char_count += len(sentence) + 1
+            else:
+                break
+        
+        if selected_sentences:
+            result = ' '.join(selected_sentences)
+            # Ensure proper ending
+            if not any(result.endswith(ending) for ending in sentence_endings):
+                result += '.' if not any('\u0600' <= c <= '\u06FF' for c in result) else '.'
+            return result
+        else:
+            # If no complete sentences fit, take first 200 chars with smart truncation
+            truncated = clean_text[:190]
+            # Try to end at a word boundary
+            last_space = truncated.rfind(' ')
+            if last_space > 150:  # Only if we can save a reasonable amount
+                truncated = truncated[:last_space]
+            return truncated + "..."
+                
+    except Exception as e:
+        print(f"Local summarization failed: {e}")
+        # Final fallback
+        return "ملخص بسيط للذكرى." if any('\u0600' <= c <= '\u06FF' for c in text) else "Simple memory summary."
 
 async def text_to_speech(text: str, static_base_dir: str) -> str:
     """
