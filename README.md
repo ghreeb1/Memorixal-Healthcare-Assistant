@@ -1,288 +1,465 @@
-# Healthcare Dashboard with Real-Time Updates
+# 🏥 MemorialX Healthcare Assistant
 
-A comprehensive FastAPI-based healthcare monitoring system with real-time dashboard updates, patient activity tracking, and AI-powered insights.
+<div align="center">
 
-## 🚀 Features
+![Python Version](https://img.shields.io/badge/python-3.8%2B-blue)
+![FastAPI](https://img.shields.io/badge/FastAPI-0.104.1-009688)
+![License](https://img.shields.io/badge/license-Healthcare-green)
+![Status](https://img.shields.io/badge/status-Production%20Ready-success)
 
-- **Real-Time Dashboard**: WebSocket-powered live updates when patients interact with the system
-- **Patient Activity Tracking**: Automatic tracking of games, chat sessions, storytelling, relaxation, and AI art activities
-- **Dual Database Support**: 
-  - `users.db` for authentication and activity tracking
-  - `memories.db` for storytelling feature
-- **AI Integration**: Gemini AI for insights and report generation
-- **Multi-Language Support**: English and Arabic interface
-- **Comprehensive Testing**: Full pytest suite for real-time functionality
+**An intelligent, real-time healthcare monitoring system with AI-powered patient support**
+
+[Features](#-features) • [Tech Stack](#-technology-stack) • [Installation](#-quick-start) • [API](#-api-endpoints)
+
+</div>
+
+---
+
+## 🎯 Overview
+
+**MemorialX Healthcare Assistant** is an enterprise-grade healthcare monitoring platform combining real-time patient tracking with AI-powered insights. Built for healthcare professionals and patients with modern web technologies.
+
+### Key Highlights
+
+- ⚡ Real-time monitoring via WebSocket
+- 🤖 AI-powered chatbot with RAG (LangChain)
+- 🧠 Smart memory system for context retention
+- 📖 Gemini-powered storytelling therapy
+- 📊 Comprehensive analytics dashboard
+- 🎮 Interactive therapy modules
+- 🌐 Multi-language (English/Arabic)
+- 🔒 HIPAA-compliant architecture
+
+---
+
+## ✨ Features
+
+### Healthcare Providers
+- Real-time patient activity monitoring with WebSocket updates
+- AI-generated insights and recommendations via Gemini
+- Exportable reports (PDF/Excel)
+- Multi-patient dashboard with live metrics
+
+### Patients
+- **AI Chatbot**: RAG-powered conversations with LangChain
+- **Interactive Therapy**: Games, Chat, Storytelling, Relaxation, AI Art
+- **Smart Memory**: Context-aware conversations with memory retention
+- **Storytelling**: Gemini-powered personalized narratives
+- Progress tracking and achievements
+- Bilingual interface with accessibility features
+
+---
+
+## 🛠 Technology Stack
+
+| Category | Technologies |
+|----------|-------------|
+| **Backend** | Python 3.8+, FastAPI, SQLAlchemy, Pydantic, Uvicorn |
+| **Frontend** | HTML5, CSS3, JavaScript ES6+, Bootstrap 5, Chart.js |
+| **AI/ML** | Google Gemini API, LangChain, RAG, Hugging Face |
+| **Chatbot** | LangChain Framework, RAG (Retrieval-Augmented Generation) |
+| **Memory System** | LangChain Memory, Vector Stores, Embeddings |
+| **Database** | SQLite (dev), PostgreSQL (prod) |
+| **Real-time** | WebSockets, Async/Await |
+| **Security** | JWT, Passlib, CORS |
+| **Testing** | pytest, pytest-asyncio, httpx |
+
+---
+
+## 🏗 Architecture
+
+<div align="center">
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    🖥️  CLIENT LAYER                         │
+│  ┌───────────────┐  ┌───────────────┐  ┌───────────────┐  │
+│  │  📊 Dashboard │  │  👤 Patient   │  │  ⚙️  Admin    │  │
+│  │   Interface   │  │   Interface   │  │    Portal     │  │
+│  └───────────────┘  └───────────────┘  └───────────────┘  │
+└────────────────────────────┬────────────────────────────────┘
+                             │ WebSocket / HTTP
+┌────────────────────────────▼────────────────────────────────┐
+│              ⚡ API GATEWAY - FastAPI                        │
+│  ┌───────────────┐  ┌───────────────┐  ┌───────────────┐  │
+│  │ 🔐 Auth (JWT) │  │  🌐 REST API  │  │ 📡 WebSocket  │  │
+│  └───────────────┘  └───────────────┘  └───────────────┘  │
+└────────────────────────────┬────────────────────────────────┘
+                             │
+┌────────────────────────────▼────────────────────────────────┐
+│           🤖 AI & INTELLIGENCE LAYER                         │
+│                                                              │
+│              ┌─────────────────────────────┐                │
+│              │  🦜 LangChain RAG Chatbot   │                │
+│              ├─────────────────────────────┤                │
+│              │  🧠 Memory Management       │                │
+│              │  📚 Vector Store & Embeddings                │
+│              │  🔍 Context Retrieval       │                │
+│              └─────────────────────────────┘                │
+└────────────────────────────┬────────────────────────────────┘
+                             │
+┌────────────────────────────▼────────────────────────────────┐
+│              ⚙️  BUSINESS LOGIC LAYER                        │
+│                                                              │
+│  ┌──────────────────┐      ┌──────────────────┐           │
+│  │ 📈 Activity      │      │ 📖 Storytelling  │           │
+│  │    Tracking      │      │    (Gemini AI)   │           │
+│  └──────────────────┘      └──────────────────┘           │
+│                                                              │
+│  ┌──────────────────┐      ┌──────────────────┐           │
+│  │ 💡 AI Insights   │      │ 📢 Real-time     │           │
+│  │    & Reports     │      │    Broadcasting  │           │
+│  └──────────────────┘      └──────────────────┘           │
+└────────────────────────────┬────────────────────────────────┘
+                             │
+┌────────────────────────────▼────────────────────────────────┐
+│           💾 DATA PERSISTENCE LAYER                          │
+│                                                              │
+│  ┌──────────────────────┐    ┌──────────────────────┐      │
+│  │  👥 users.db         │    │  💭 memories.db      │      │
+│  │  (SQLite-WAL Mode)   │    │  (Storytelling)      │      │
+│  └──────────────────────┘    └──────────────────────┘      │
+└────────────────────────────┬────────────────────────────────┘
+                             │
+┌────────────────────────────▼────────────────────────────────┐
+│              🌐 EXTERNAL SERVICES                            │
+│                                                              │
+│     ┌──────────────────┐         ┌──────────────────┐      │
+│     │ ✨ Google Gemini │         │ 🤗 Hugging Face  │      │
+│     │       AI         │         │      API         │      │
+│     └──────────────────┘         └──────────────────┘      │
+└─────────────────────────────────────────────────────────────┘
+```
+
+</div>
+
+### 🔄 Data Flow
+
+**Request Flow:**
+1. 🖥️ **Client** → Sends request (WebSocket/HTTP)
+2. ⚡ **API Gateway** → Authenticates & validates with JWT
+3. 🤖 **AI Layer** → LangChain RAG processes with context & memory
+4. ⚙️ **Services** → Executes business logic (tracking/storytelling/insights)
+5. 💾 **Database** → Persists data to SQLite
+6. 🌐 **External APIs** → Integrates Gemini/HuggingFace when needed
+7. 📢 **Broadcasting** → Real-time updates via WebSocket to all clients
+
+**Key Features:**
+- 🔐 **Security**: JWT authentication at API layer
+- 🧠 **Intelligence**: RAG-powered chatbot with memory
+- ⚡ **Real-time**: WebSocket for instant updates
+- 📊 **Analytics**: Comprehensive tracking and insights
+- 🎨 **AI Generation**: Gemini storytelling & HuggingFace art
+
+
+
+---
 
 ## 📁 Project Structure
 
 ```
 healthcare-dashboard/
-├── main.py                     # Main FastAPI application
-├── config.py                   # Configuration settings
-├── routes_dashboard.py         # Dashboard API routes
-├── storytelling_feature/       # Storytelling module
-│   ├── routes.py              # Storytelling routes
-│   ├── core/db.py             # Database models and CRUD
-│   └── services/ai_services.py # AI services
-├── templates/                  # HTML templates
-│   ├── unified_dashboard.html  # Main dashboard
-│   └── storytelling/          # Storytelling templates
-├── static/                     # Static assets
-│   ├── js/activity-tracker.js # Client-side activity tracking
-│   ├── css/                   # Stylesheets
-│   └── images/                # Image uploads
-├── tests/                      # Test suite
-│   ├── test_realtime_dashboard.py # Real-time functionality tests
-│   └── test_chat_and_usage.py     # Existing tests
-├── requirements.txt            # Python dependencies
-├── demo_realtime.py           # Real-time demo script
-└── README.md                  # This file
+├── main.py                    # Entry point
+├── config.py                  # Configuration
+├── routes_dashboard.py        # Dashboard APIs
+├── storytelling_feature/      # Storytelling module
+├── templates/                 # HTML templates
+├── static/                    # CSS, JS, images
+│   └── js/activity-tracker.js # Real-time client
+├── tests/                     # Test suite
+└── requirements.txt           # Dependencies
 ```
-
-## 🛠️ Installation & Setup
-
-Follow the steps below to set up and run the project on your local machine.
 
 ---
 
-### 1. Create & Activate Virtual Environment
+## 🚀 Quick Start
+
+### 1. Clone & Setup
 
 ```bash
-# Create a virtual environment
+git clone https://github.com/ghreeb1/Memorixal-Healthcare-Assistant.git
+cd Memorixal-Healthcare-Assistant
+
+# Create virtual environment
 python -m venv venv
-Activate it:
+source venv/bin/activate  # Linux/Mac
+# venv\Scripts\activate   # Windows
 
-Windows:
-
-bash
-Copy code
-venv\Scripts\activate
-Linux / macOS:
-
-bash
-Copy code
-source venv/bin/activate
-2. Install Dependencies
-bash
-Copy code
-# Upgrade pip to the latest version
-pip install --upgrade pip
-
-# Install all dependencies
+# Install dependencies
 pip install -r requirements.txt
-### 2. Environment Setup (Optional)
-
-Create a `.env` file for optional configurations:
-
-```env
-# Optional: Gemini AI API key for enhanced insights
-GEMINI_API_KEY=your_gemini_api_key_here
-
-# Optional: Hugging Face API key for AI art
-HF_API_KEY=your_huggingface_api_key_here
-
-# Security (change in production)
-SECRET_KEY=your_secret_key_change_in_production
 ```
 
-### 3. Database Initialization
+### 2. Configure Environment
 
-The databases will be created automatically on first run:
-- `users.db` - User authentication and activity tracking
-- `memories.db` - Storytelling memories storage
+Create `.env` file:
 
-## 🚀 Running the Application
+```env
+SECRET_KEY=your_secret_key_min_32_chars
+GEMINI_API_KEY=your_gemini_key          # Required for AI features
+HF_API_KEY=your_huggingface_key         # Optional
+LANGCHAIN_API_KEY=your_langchain_key    # Optional for tracing
+DEBUG=True
+```
 
-### Start the Server
+### 3. Run Application
 
 ```bash
 python main.py
 ```
 
-Or using uvicorn directly:
+**Access:**
+- Dashboard: http://localhost:8000/dashboard
+- API Docs: http://localhost:8000/docs
 
+---
+
+## 🔌 API Endpoints
+
+### Authentication
 ```bash
-uvicorn main:app --host localhost --port 8000 --reload
+POST /api/auth/login
 ```
 
-The application will be available at:
-- **Main Application**: http://localhost:8000
-- **Dashboard**: http://localhost:8000/dashboard
-- **API Documentation**: http://localhost:8000/docs
+### Dashboard
+```bash
+GET  /api/v1/patients/{id}/dashboard     # Get metrics
+GET  /api/v1/patients/{id}/activities    # Get activities
+GET  /api/v1/patients/{id}/ai-insights   # AI insights
+POST /api/report                          # Generate report
+```
+
+### Real-Time Tracking
+```bash
+POST /api/patient-activity/start  # Start activity
+POST /api/patient-activity/end    # End activity
+WS   /ws/dashboard                # WebSocket updates
+```
+
+### WebSocket Example
+```javascript
+const ws = new WebSocket('ws://localhost:8000/ws/dashboard');
+ws.onmessage = (event) => {
+  const update = JSON.parse(event.data);
+  console.log('Update:', update);
+};
+```
+
+---
 
 ## 🧪 Testing
 
-### Run All Tests
-
 ```bash
+# Run all tests
 pytest
-```
 
-### Run Specific Test Categories
+# Run with coverage
+pytest --cov=. --cov-report=html
 
-```bash
-# Test real-time dashboard functionality
-pytest tests/test_realtime_dashboard.py -v
-
-# Test existing chat and usage functionality
-pytest tests/test_chat_and_usage.py -v
-```
-
-### Test Real-Time Functionality
-
-```bash
-# Run the interactive demo
+# Run real-time demo
 python demo_realtime.py
 ```
 
-This demo will:
-1. Test WebSocket connections
-2. Simulate patient activities
-3. Show real-time updates in the dashboard
+---
 
-## 🔄 Real-Time Dashboard Features
+## 🚀 Deployment
 
-### How It Works
-
-1. **WebSocket Connection**: Dashboard connects to `/ws/dashboard` for real-time updates
-2. **Activity Tracking**: Patient activities are tracked via JavaScript client (`activity-tracker.js`)
-3. **Automatic Broadcasting**: When activities start/end, updates are broadcast to all connected dashboards
-4. **Live Metrics**: Dashboard shows live updates of:
-   - Today's sessions
-   - Weekly statistics
-   - Activity scores
-   - Health status
-
-### Testing Real-Time Updates
-
-1. **Open Dashboard**: Navigate to http://localhost:8000/dashboard
-2. **Open Patient Interface**: In another tab, go to http://localhost:8000/patient
-3. **Interact with Activities**: Use games, chat, storytelling features
-4. **Watch Dashboard**: See real-time updates appear instantly
-
-### Manual Testing with API
-
-```bash
-# Start an activity
-curl -X POST http://localhost:8000/api/patient-activity/start \
-  -H "Content-Type: application/json" \
-  -d '{"patient_id": "1", "activity_type": "games"}'
-
-# End an activity with score
-curl -X POST http://localhost:8000/api/patient-activity/end \
-  -H "Content-Type: application/json" \
-  -d '{"patient_id": "1", "activity_type": "games", "duration": 300, "score": 85}'
+### Docker
+```dockerfile
+FROM python:3.9-slim
+WORKDIR /app
+COPY requirements.txt .
+RUN pip install -r requirements.txt
+COPY . .
+EXPOSE 8000
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
 ```
 
-## 🎯 Key API Endpoints
+```bash
+docker build -t healthcare-dashboard .
+docker run -p 8000:8000 healthcare-dashboard
+```
 
-### Dashboard APIs
-- `GET /api/v1/patients/{id}/dashboard` - Get dashboard metrics
-- `GET /api/v1/patients/{id}/activities` - Get patient activities
-- `GET /api/v1/patients/{id}/ai-insights` - Get AI insights
-- `POST /api/report` - Generate comprehensive report
+### Production Settings
+```env
+DEBUG=False
+SECRET_KEY=production_secret_key
+ALLOWED_ORIGINS=https://yourdomain.com
+DATABASE_URL=postgresql://user:pass@host/db
+```
 
-### Real-Time Activity Tracking
-- `POST /api/patient-activity/start` - Start activity tracking
-- `POST /api/patient-activity/end` - End activity tracking
-- `WS /ws/dashboard` - WebSocket for real-time updates
+---
 
-### Feature Usage Tracking (Legacy)
-- `POST /api/v1/feature-usage/start` - Start feature usage
-- `POST /api/v1/feature-usage/end` - End feature usage
+## 🔧 Troubleshooting
 
-## 🔧 Configuration
+| Issue | Solution |
+|-------|----------|
+| WebSocket fails | Check firewall, verify port 8000 |
+| Database locked | Close other instances, enable WAL mode |
+| Import errors | `pip install -r requirements.txt --force-reinstall` |
+| No real-time updates | Check browser console, run demo_realtime.py |
 
-### Database Configuration
-- **Users Database**: SQLite at `./users.db`
-- **Memories Database**: SQLite at `./memories.db`
-- Both databases support concurrent access with proper connection pooling
-
-### WebSocket Configuration
-- **Endpoint**: `/ws/dashboard`
-- **Auto-reconnection**: Up to 5 attempts with 3-second delays
-- **Connection Status**: Visual indicator in dashboard
-
-### AI Services
-- **Gemini AI**: For insights and report generation (requires API key)
-- **Hugging Face**: For AI art generation (optional)
-- **Local Fallbacks**: System works without AI services
-
-## 🐛 Troubleshooting
-
-### Common Issues
-
-1. **WebSocket Connection Failed**
-   ```
-   Solution: Ensure server is running on localhost:8000
-   Check firewall settings
-   ```
-
-2. **Database Locked Errors**
-   ```
-   Solution: Ensure no other instances are running
-   Check file permissions on .db files
-   ```
-
-3. **Real-Time Updates Not Working**
-   ```
-   Solution: Check browser console for WebSocket errors
-   Verify activity-tracker.js is loaded
-   Test with demo_realtime.py
-   ```
-
-### Debug Mode
-
-Run with debug logging:
+**Debug Mode:**
 ```bash
 LOG_LEVEL=DEBUG python main.py
 ```
 
-## 📊 Performance Notes
+---
 
-- **WebSocket Connections**: Supports multiple concurrent dashboard connections
-- **Database**: SQLite with WAL mode for better concurrent access
-- **Memory Usage**: Optimized for healthcare environments
-- **Response Times**: Sub-second real-time updates
+## 🗺 Roadmap
 
-## 🔐 Security
+**Version 2.0** (Q1 2026)
+- Mobile apps (iOS/Android)
+- Advanced ML prediction models
+- Video consultation
+- Multi-tenant support
 
-- **Authentication**: JWT-based user authentication
-- **CORS**: Configured for development (restrict in production)
-- **Input Validation**: Pydantic models for API validation
-- **SQL Injection**: Protected via SQLAlchemy ORM
+---
 
-## 🚀 Production Deployment
+## 📄 License
 
-### Environment Variables for Production
-```env
-DEBUG=False
-SECRET_KEY=your_production_secret_key
-ALLOWED_ORIGINS=https://yourdomain.com
-```
+<div align="center">
 
-### Recommended Production Setup
-- Use PostgreSQL instead of SQLite
-- Configure proper CORS origins
-- Use HTTPS with SSL certificates
-- Set up proper logging and monitoring
+### MIT License
 
-## 📝 License
+Copyright (c) 2025 Mohamed Khaled
 
-This project is developed for healthcare monitoring purposes. Ensure compliance with healthcare data regulations (HIPAA, GDPR) when deploying in production.
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
 
-## 🤝 Contributing
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
 
-1. Fork the repository
-2. Create a feature branch
-3. Add tests for new functionality
-4. Ensure all tests pass
-5. Submit a pull request
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
 
-## 📞 Support
+---
 
-For issues and questions:
-1. Check the troubleshooting section
-2. Run the test suite to identify issues
-3. Use the demo script to verify functionality
-4. Check server logs for detailed error information
+### ⚠️ Healthcare Compliance Notice
+
+**This software is designed for healthcare applications. When deploying in production:**
+
+- ✅ Ensure compliance with **HIPAA** (Health Insurance Portability and Accountability Act)
+- ✅ Follow **GDPR** regulations for data protection (EU)
+- ✅ Implement **end-to-end encryption** for patient data
+- ✅ Maintain **audit logs** for all system access
+- ✅ Conduct **security audits** before production deployment
+- ✅ Obtain necessary **certifications** and approvals
+
+**The developers are not responsible for any misuse or non-compliance with healthcare regulations.**
+
+</div>
+
+---
+
+## 🙏 Acknowledgments
+
+<div align="center">
+
+### Built With Amazing Technologies
+
+<table>
+  <tr>
+    <td align="center" width="140">
+      <img src="https://cdn.worldvectorlogo.com/logos/fastapi.svg" width="48" height="48" alt="FastAPI" />
+      <br /><b>FastAPI</b>
+    </td>
+    <td align="center" width="140">
+      <img src="https://www.gstatic.com/lamda/images/gemini_sparkle_v002_d4735304ff6292a690345.svg" width="48" height="48" alt="Gemini" />
+      <br /><b>Google Gemini</b>
+    </td>
+    <td align="center" width="140">
+      <img src="https://avatars.githubusercontent.com/u/126733545?s=200&v=4" width="48" height="48" alt="LangChain" />
+      <br /><b>LangChain</b>
+    </td>
+    <td align="center" width="140">
+      <img src="https://cdn.worldvectorlogo.com/logos/sqlalchemy.svg" width="48" height="48" alt="SQLAlchemy" />
+      <br /><b>SQLAlchemy</b>
+    </td>
+  </tr>
+  <tr>
+    <td align="center" width="140">
+      <img src="https://huggingface.co/front/assets/huggingface_logo-noborder.svg" width="48" height="48" alt="Hugging Face" />
+      <br /><b>Hugging Face</b>
+    </td>
+    <td align="center" width="140">
+      <img src="https://cdn.worldvectorlogo.com/logos/python-5.svg" width="48" height="48" alt="Python" />
+      <br /><b>Python</b>
+    </td>
+    <td align="center" width="140">
+      <img src="https://www.vectorlogo.zone/logos/sqlite/sqlite-icon.svg" width="48" height="48" alt="SQLite" />
+      <br /><b>SQLite</b>
+    </td>
+    <td align="center" width="140">
+      <img src="https://cdn.worldvectorlogo.com/logos/bootstrap-4.svg" width="48" height="48" alt="Bootstrap" />
+      <br /><b>Bootstrap</b>
+    </td>
+  </tr>
+  <tr>
+    <td align="center" width="140">
+      <img src="https://cdn.worldvectorlogo.com/logos/websocket.svg" width="48" height="48" alt="WebSocket" />
+      <br /><b>WebSocket</b>
+    </td>
+    <td align="center" width="140">
+      <img src="https://www.chartjs.org/img/chartjs-logo.svg" width="48" height="48" alt="Chart.js" />
+      <br /><b>Chart.js</b>
+    </td>
+    <td align="center" width="140">
+      <img src="https://docs.pytest.org/en/stable/_static/pytest1.png" width="48" height="48" alt="Pytest" />
+      <br /><b>Pytest</b>
+    </td>
+    <td align="center" width="140">
+      <img src="https://cdn.worldvectorlogo.com/logos/jwt-3.svg" width="48" height="48" alt="JWT" />
+      <br /><b>JWT</b>
+    </td>
+  </tr>
+</table>
+
+<br />
+
+**Special thanks to the Open Source Community** 💙
+
+</div>
+
+---
+
+## 📧 Contact
+
+<div align="center">
+
+### **Developer**
+
+<h3>Mohamed Khaled</h3>
+
+<p>
+  <a href="mailto:qq11gharipqq11@gmail.com" target="_blank">
+    <img src="https://img.shields.io/badge/-Gmail-D14836?style=for-the-badge&logo=gmail&logoColor=white" alt="Gmail"/>
+  </a>
+  <a href="https://www.linkedin.com/in/mohamed-khaled-3a9021263" target="_blank">
+    <img src="https://img.shields.io/badge/-LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white" alt="LinkedIn"/>
+  </a>
+</p>
+
+**AI & Machine Learning Specialist | Healthcare Technology Innovator**
+
+*Building intelligent solutions for better patient care*
+
+</div>
+
+---
+
+<div align="center">
+
+[![GitHub Issues](https://img.shields.io/github/issues/ghreeb1/Memorixal-Healthcare-Assistant)](https://github.com/ghreeb1/Memorixal-Healthcare-Assistant/issues)
+[![GitHub Stars](https://img.shields.io/github/stars/ghreeb1/Memorixal-Healthcare-Assistant)](https://github.com/ghreeb1/Memorixal-Healthcare-Assistant/stargazers)
+[![GitHub Forks](https://img.shields.io/github/forks/ghreeb1/Memorixal-Healthcare-Assistant)](https://github.com/ghreeb1/Memorixal-Healthcare-Assistant/network/members)
+
+</div>
