@@ -315,51 +315,6 @@ LOG_LEVEL=DEBUG python main.py
 
 ---
 
-## 📄 License
-
-<div align="center">
-
-### MIT License
-
-Copyright (c) 2025 Mohamed Khaled
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-
----
-
-### ⚠️ Healthcare Compliance Notice
-
-**This software is designed for healthcare applications. When deploying in production:**
-
-- ✅ Ensure compliance with **HIPAA** (Health Insurance Portability and Accountability Act)
-- ✅ Follow **GDPR** regulations for data protection (EU)
-- ✅ Implement **end-to-end encryption** for patient data
-- ✅ Maintain **audit logs** for all system access
-- ✅ Conduct **security audits** before production deployment
-- ✅ Obtain necessary **certifications** and approvals
-
-**The developers are not responsible for any misuse or non-compliance with healthcare regulations.**
-
-</div>
-
----
-
 ## 🙏 Acknowledgments
 
 <div align="center">
@@ -425,7 +380,6 @@ SOFTWARE.
 
 <br />
 
-**Special thanks to the Open Source Community** 💙
 
 </div>
 
