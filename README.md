@@ -151,8 +151,6 @@
 - 📊 **Analytics**: Comprehensive tracking and insights
 - 🎨 **AI Generation**: Gemini storytelling & HuggingFace art
 
-
-
 ---
 
 ## 📁 Project Structure
@@ -380,6 +378,56 @@ LOG_LEVEL=DEBUG python main.py
 
 <br />
 
+</div>
+
+---
+
+## 👥 Contributors
+
+<div align="center">
+
+### Development Team
+
+<table>
+  <tr>
+    <td align="center">
+      <a href="https://github.com/ghreeb1">
+        <img src="https://github.com/ghreeb1.png" width="100px;" alt="Mohamed Khaled"/>
+        <br />
+        <sub><b>Mohamed Khaled</b></sub>
+      </a>
+      <br />
+      <sub>Lead Developer & AI Specialist</sub>
+      <br />
+      <a href="https://www.linkedin.com/in/mohamed-khaled-3a9021263">
+        <img src="https://img.shields.io/badge/-LinkedIn-0A66C2?style=flat&logo=linkedin&logoColor=white" alt="LinkedIn"/>
+      </a>
+      <a href="mailto:qq11gharipqq11@gmail.com">
+        <img src="https://img.shields.io/badge/-Gmail-D14836?style=flat&logo=gmail&logoColor=white" alt="Gmail"/>
+      </a>
+    </td>
+    <td align="center">
+      <a href="https://github.com/SARAELSAFTY">
+        <img src="https://github.com/SARAELSAFTY.png" width="100px;" alt="Sara El Safty"/>
+        <br />
+        <sub><b>Sara El Safty</b></sub>
+      </a>
+      <br />
+      <sub>Core Contributor</sub>
+    </td>
+    <td align="center">
+      <a href="https://github.com/Iam-M-i-r-z-a">
+        <img src="https://github.com/Iam-M-i-r-z-a.png" width="100px;" alt="Mirza"/>
+        <br />
+        <sub><b>Mirza</b></sub>
+      </a>
+      <br />
+      <sub>Core Contributor</sub>
+    </td>
+  </tr>
+</table>
+
+*Building intelligent healthcare solutions together*
 
 </div>
 
@@ -389,9 +437,11 @@ LOG_LEVEL=DEBUG python main.py
 
 <div align="center">
 
-### **Developer**
+### Get In Touch
 
-<h3>Mohamed Khaled</h3>
+For questions, suggestions, or collaboration opportunities:
+
+**Project Lead:** Mohamed Khaled
 
 <p>
   <a href="mailto:qq11gharipqq11@gmail.com" target="_blank">
@@ -400,11 +450,10 @@ LOG_LEVEL=DEBUG python main.py
   <a href="https://www.linkedin.com/in/mohamed-khaled-3a9021263" target="_blank">
     <img src="https://img.shields.io/badge/-LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white" alt="LinkedIn"/>
   </a>
+  <a href="https://github.com/ghreeb1/Memorixal-Healthcare-Assistant" target="_blank">
+    <img src="https://img.shields.io/badge/-GitHub-181717?style=for-the-badge&logo=github&logoColor=white" alt="GitHub"/>
+  </a>
 </p>
-
-**AI & Machine Learning Specialist | Healthcare Technology Innovator**
-
-*Building intelligent solutions for better patient care*
 
 </div>
 
@@ -415,5 +464,7 @@ LOG_LEVEL=DEBUG python main.py
 [![GitHub Issues](https://img.shields.io/github/issues/ghreeb1/Memorixal-Healthcare-Assistant)](https://github.com/ghreeb1/Memorixal-Healthcare-Assistant/issues)
 [![GitHub Stars](https://img.shields.io/github/stars/ghreeb1/Memorixal-Healthcare-Assistant)](https://github.com/ghreeb1/Memorixal-Healthcare-Assistant/stargazers)
 [![GitHub Forks](https://img.shields.io/github/forks/ghreeb1/Memorixal-Healthcare-Assistant)](https://github.com/ghreeb1/Memorixal-Healthcare-Assistant/network/members)
+
+**Made with ❤️ for better healthcare**
 
 </div>
